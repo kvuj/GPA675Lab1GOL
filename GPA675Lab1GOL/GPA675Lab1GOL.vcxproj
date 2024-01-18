@@ -110,10 +110,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <QtRcc Include="GPA675Lab1GOL.qrc" />
+    <ClCompile Include="GOLTeamH.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GOLTeamH.h" />
     <ClInclude Include="Grid.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
