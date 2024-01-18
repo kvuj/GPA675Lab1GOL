@@ -2,27 +2,27 @@
 
 size_t GOLTeamH::width() const
 {
-	return size_t();
+	return mData.width();
 }
 
 size_t GOLTeamH::height() const
 {
-	return size_t();
+	return mData.height();
 }
 
 size_t GOLTeamH::size() const
 {
-	return size_t();
+	return mData.size();
 }
 
 GOL::State GOLTeamH::state(int x, int y) const
 {
-	return State();
+	return mData.value(x, y);
 }
 
 std::string GOLTeamH::rule() const
 {
-	return std::string();
+	return mRule;
 }
 
 GOL::BorderManagement GOLTeamH::borderManagement() const
@@ -52,7 +52,9 @@ void GOLTeamH::resize(size_t width, size_t height, State defaultState)
 
 bool GOLTeamH::setRule(std::string const& rule)
 {
-	return false;
+	mRule = rule;
+	return true;
+	// TODO: return false si parsing error;
 }
 
 void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
@@ -61,10 +63,12 @@ void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
 
 void GOLTeamH::setState(int x, int y, State state)
 {
+	mData.setAt(x, y, state);
 }
 
 void GOLTeamH::fill(State state)
 {
+	mData.resize(mData.width(), mData.height(), state);
 }
 
 void GOLTeamH::fillAlternately(State firstCell)

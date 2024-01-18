@@ -16,6 +16,7 @@ public:
 	Color color(State state) const override;
 	Statistics statistics() const override;
 	ImplementationInformation information() const override;
+
 	void resize(size_t width, size_t height, State defaultState) override;
 	bool setRule(std::string const& rule) override;
 	void setBorderManagement(BorderManagement borderManagement) override;
