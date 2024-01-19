@@ -116,7 +116,7 @@ bool GOLTeamH::setRule(std::string const& rule)
 		return false;
 }
 
-void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
+void GOLTeamH::setBorderManagement(GOL::BorderManagement borderManagement)
 {
 	mBorderManagement = borderManagement;
 	mIteration = 0;

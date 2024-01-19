@@ -45,5 +45,13 @@
     <ClInclude Include="GOLTeamH.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\GOLAppLib\header\GOL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="..\GOLAppLib\header\GOLApp.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

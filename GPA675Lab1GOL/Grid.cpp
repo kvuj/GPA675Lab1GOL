@@ -7,7 +7,7 @@ Grid::Grid()
 }
 
 Grid::Grid(size_t width, size_t height, CellType initValue)
-	:mWidth{ width }, mHeight{ height }, mEngine(mRandomDevice), mDistribution(0.0, 1.0)
+	:mWidth{ width }, mHeight{ height }, mEngine(mRandomDevice()), mDistribution(0.0, 1.0)
 {
 	resize(width, height, initValue);
 }

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <random>
+
 #include "GOL.h"
 
 class Grid																		// Classe facilitant la gestion d'un tableau dynamique 2d.

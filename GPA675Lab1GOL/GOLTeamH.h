@@ -35,7 +35,7 @@ public:
 
 private:
 	std::optional<std::string> mRule;
-	std::optional<GOL::BorderManagement> mBorderManagement;
+	std::optional<BorderManagement> mBorderManagement;
 	std::optional<IterationType> mIteration;
 
 	Grid mData;

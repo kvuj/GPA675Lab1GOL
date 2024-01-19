@@ -115,6 +115,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\GOLAppLib\header\GOL.h" />
+    <QtMoc Include="..\GOLAppLib\header\GOLApp.h" />
     <ClInclude Include="GOLTeamH.h" />
     <ClInclude Include="Grid.h" />
   </ItemGroup>
