@@ -111,14 +111,14 @@
   <ItemGroup>
     <QtRcc Include="GPA675Lab1GOL.qrc" />
     <ClCompile Include="GOLTeamH.cpp" />
-    <ClCompile Include="Grid.cpp" />
+    <ClCompile Include="GridTeamH.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\GOLAppLib\header\GOL.h" />
     <QtMoc Include="..\GOLAppLib\header\GOLApp.h" />
     <ClInclude Include="GOLTeamH.h" />
-    <ClInclude Include="Grid.h" />
+    <ClInclude Include="GridTeamH.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

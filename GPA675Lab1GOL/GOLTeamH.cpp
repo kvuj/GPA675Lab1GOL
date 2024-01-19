@@ -59,7 +59,7 @@ GOL::ImplementationInformation GOLTeamH::information() const
 {
 	return std::move(ImplementationInformation{
 		.title{"Laboratoire 1"},
-		.authors{{"Timothée Leclaire-Fournier"}, {"et Martin Euzenat"} }
+		.authors{{"Timothée Leclaire-Fournier"}, {"Martin Euzenat"} }
 		// Réponses aux questions...
 		});
 }
@@ -171,13 +171,38 @@ void GOLTeamH::setSolidColor(State state, Color const& color)
 // TODO
 void GOLTeamH::processOneStep()
 {
-
+	
 }
 
-// TODO
 void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 {
+	if (buffer == nullptr)
+		return;
 
+	auto s_ptr = buffer;
+	auto e_ptr = &buffer[buffer_size];
+
+	for (const auto& i : mData.data()) {
+		if (i == GridTeamH::CellType::alive) {
+			*s_ptr &= 0;						// Clear
+			*s_ptr |= MAX_ALPHA << 24;			// Alpha = 255
+			*s_ptr |= mAliveColor.red << 16;
+			*s_ptr |= mAliveColor.green << 8;
+			*s_ptr |= mAliveColor.blue;
+		}
+		else {
+			*s_ptr &= 0;
+			*s_ptr |= MAX_ALPHA << 24;
+			*s_ptr |= mDeadColor.red << 16;
+			*s_ptr |= mDeadColor.green << 8;
+			*s_ptr |= mDeadColor.blue;
+		}
+		s_ptr++;
+
+		// Sanity check
+		if (s_ptr > e_ptr)
+			break;
+	}
 }
 
 std::optional<unsigned char> GOLTeamH::convertCharToNumber(const char c)

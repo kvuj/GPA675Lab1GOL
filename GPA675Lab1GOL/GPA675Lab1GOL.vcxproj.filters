@@ -31,7 +31,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Grid.cpp">
+    <ClCompile Include="GridTeamH.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GOLTeamH.cpp">
@@ -39,7 +39,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Grid.h">
+    <ClInclude Include="GridTeamH.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GOLTeamH.h">

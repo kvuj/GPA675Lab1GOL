@@ -5,7 +5,9 @@
 #include <optional>
 #include <bitset>
 #include <GOL.h>
-#include "Grid.h"
+#include "GridTeamH.h"
+
+constexpr unsigned char MAX_ALPHA = 255;
 
 class GOLTeamH : public GOL
 {
@@ -38,7 +40,7 @@ private:
 	std::optional<BorderManagement> mBorderManagement;
 	std::optional<IterationType> mIteration;
 
-	Grid mData;
+	GridTeamH mData;
 	std::bitset<9> mParsedRuleRevive, mParsedRuleSurvive;
 	Color mDeadColor, mAliveColor;
 
