@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include <array>
+#include <optional>
+#include <bitset>
 #include <GOL.h>
 #include "Grid.h"
 
@@ -30,7 +33,13 @@ public:
 	void processOneStep() override;
 	void updateImage(uint32_t* buffer, size_t buffer_size) const override;
 private:
-	Grid mData;
-	std::string mRule;
-};
+	std::optional<std::string> mRule;
+	std::optional<GOL::BorderManagement> mBorderManagement;
+	std::optional<IterationType> mIteration;
 
+	Grid mData;
+	std::bitset<9> mParsedRuleRevive, mParsedRuleSurvive;
+	Color mDeadColor, mAliveColor;
+
+	std::optional<unsigned char> convertCharToNumber(const char c);
+};

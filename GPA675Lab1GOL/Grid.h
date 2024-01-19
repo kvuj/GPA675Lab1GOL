@@ -34,10 +34,11 @@ public:																			//
 	void setAt(int column, int row, CellType value);							// Mutateur modifiant la valeur d'une cellule à une certaine coordonnée. Cette fonction VALIDE ses entrées et ne fait rien si la coordonnée est invalide. 
 																				// 
 	// Accesseurs du "buffer" de la grille.										//
-	DataType const & data() const;												// Accesseur en lecture seule sur le "buffer" de la grille.
-	DataType & data();															// Accesseur en lecture/écriture sur le "buffer" de la grille.
-																				// 
+	DataType const& data() const;												// Accesseur en lecture seule sur le "buffer" de la grille.
+	DataType& data();															// Accesseur en lecture/écriture sur le "buffer" de la grille.
+
+	DataType totalDead();
 private:																		// 
 	DataType mData;																// Il y a des attributs essentiels au fonctionnement de cette classe.
 	size_t mWidth, mHeight;														// À vous de les déterminer. 
-};	
+};
