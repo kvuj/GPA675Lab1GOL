@@ -1,6 +1,8 @@
 #pragma once
 
+#include <algorithm>
 #include <vector>
+#include <random>
 #include "GOL.h"
 
 class Grid																		// Classe facilitant la gestion d'un tableau dynamique 2d.
@@ -37,8 +39,22 @@ public:																			//
 	DataType const& data() const;												// Accesseur en lecture seule sur le "buffer" de la grille.
 	DataType& data();															// Accesseur en lecture/écriture sur le "buffer" de la grille.
 
-	DataType totalDead();
+	size_t totalDead() const;
+	float totalDeadRel() const;
+
+	size_t totalAlive() const;
+	float totalAliveRel() const;
+
+	void fill(CellType value);
+	void fillAternately(CellType initValue);
+	void randomize(double percentAlive);
+
 private:																		// 
 	DataType mData;																// Il y a des attributs essentiels au fonctionnement de cette classe.
 	size_t mWidth, mHeight;														// À vous de les déterminer. 
+	
+	// Random
+	std::random_device mRandomDevice;
+	std::mt19937 mEngine;
+	std::uniform_real_distribution<> mDistribution;
 };

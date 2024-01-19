@@ -32,6 +32,7 @@ public:
 	void setSolidColor(State state, Color const& color) override;
 	void processOneStep() override;
 	void updateImage(uint32_t* buffer, size_t buffer_size) const override;
+
 private:
 	std::optional<std::string> mRule;
 	std::optional<GOL::BorderManagement> mBorderManagement;
