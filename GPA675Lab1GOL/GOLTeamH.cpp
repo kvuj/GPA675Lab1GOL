@@ -27,7 +27,7 @@ std::string GOLTeamH::rule() const
 
 GOL::BorderManagement GOLTeamH::borderManagement() const
 {
-	return mBorderManagement.value_or(std::move(GOL::borderManagement()));
+	return mBorderManagement.value_or(GOL::BorderManagement::immutableAsIs);
 }
 
 GOL::Color GOLTeamH::color(State state) const
@@ -168,11 +168,13 @@ void GOLTeamH::setSolidColor(State state, Color const& color)
 		mAliveColor = color;
 }
 
+// TODO
 void GOLTeamH::processOneStep()
 {
 
 }
 
+// TODO
 void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 {
 
