@@ -121,6 +121,21 @@ void GOLTeamH::setBorderManagement(GOL::BorderManagement borderManagement)
 {
 	mBorderManagement = borderManagement;
 	mIteration = 0;
+
+	switch (borderManagement) {
+	case GOL::BorderManagement::foreverDead:
+		mData.fillBorder(GridTeamH::CellType::dead);
+		break;
+	case GOL::BorderManagement::foreverAlive:
+		mData.fillBorder(GridTeamH::CellType::alive);
+		break;
+	case GOL::BorderManagement::warping:
+		mData.fillBorderWarped();
+		break;
+	case GOL::BorderManagement::mirror:
+		mData.fillBorderWarped();
+		break;
+	}
 }
 
 void GOLTeamH::setState(int x, int y, State state)
@@ -131,19 +146,31 @@ void GOLTeamH::setState(int x, int y, State state)
 
 void GOLTeamH::fill(State state)
 {
-	mData.fill(state);
+	if (mBorderManagement == GOL::BorderManagement::immutableAsIs)
+		mData.fill(state, true);
+	else
+		mData.fill(state, false);
+
 	mIteration = 0;
 }
 
 void GOLTeamH::fillAlternately(State firstCell)
 {
-	mData.fillAternately(firstCell);
+	if (mBorderManagement == GOL::BorderManagement::immutableAsIs)
+		mData.fillAternately(firstCell, true);
+	else
+		mData.fillAternately(firstCell, false);
+
 	mIteration = 0;
 }
 
 void GOLTeamH::randomize(double percentAlive)
 {
-	mData.randomize(percentAlive);
+	if (mBorderManagement == GOL::BorderManagement::immutableAsIs)
+		mData.randomize(percentAlive, true);
+	else
+		mData.randomize(percentAlive, false);
+
 	mIteration = 0;
 }
 
@@ -169,14 +196,68 @@ void GOLTeamH::setSolidColor(State state, Color const& color)
 		mAliveColor = color;
 }
 
-// TODO: performance
 void GOLTeamH::processOneStep()
 {
-	// On commence à itérer sur les côtés. En règlant ces cas particuliers, on 
-	// peut éviter des branches dans la boucle principale. Le branch predictor
-	// aime cela.
-	for (size_t i{}; i < mData.width(); ++i) {
-		
+	auto& grid{ mData.data() };
+	auto& intGrid{ mData.intData() };
+
+	if (mBorderManagement == GOL::BorderManagement::foreverDead) {
+		size_t aliveCount{};
+		size_t offset{ width() + 2 };
+		auto* ptr{ &grid[0]};
+
+		for (size_t i{}; i < mData.realSize() - offset - 1; ++i) {
+
+			if (mData.isInBorder(i)) {
+				ptr++;
+				continue;
+			}
+
+			aliveCount = 0;
+
+			// Top
+			ptr -= offset + 1;
+			if (*ptr == GOL::State::alive)
+				aliveCount++;
+			ptr++;
+			if (*ptr == GOL::State::alive)
+				aliveCount++;
+			ptr++;
+			if (*ptr == GOL::State::alive)
+				aliveCount++;
+
+			// Milieu
+			ptr += offset - 2;
+			if (*ptr == GOL::State::alive)
+				aliveCount++;
+			ptr += 2;
+			if (*ptr == GOL::State::alive)
+				aliveCount++;
+
+
+			// Dessous
+			ptr += offset - 2;
+			if (*ptr == GOL::State::alive)
+				aliveCount++;
+			ptr++;
+			if (*ptr == GOL::State::alive)
+				aliveCount++;
+			ptr++;
+			if (*ptr == GOL::State::alive)
+				aliveCount++;
+
+			if (grid[i] == GOL::State::alive)
+				intGrid[i] = (mParsedRuleSurvive.test(aliveCount)) ? GOL::State::alive : GOL::State::dead;
+			else
+				intGrid[i] = (mParsedRuleRevive.test(aliveCount)) ? GOL::State::alive : GOL::State::dead;
+
+			// On retourne à une place plus loin qu'à l'origine.
+			ptr -= offset;
+		}
+		ptr = nullptr;
+
+		mData.switchToIntermediate();
+		mIteration.value()++;
 	}
 }
 
@@ -187,29 +268,30 @@ void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 
 	auto s_ptr = buffer;
 	auto e_ptr = &buffer[buffer_size];
+	auto& grid = mData.data();
 
-	 // On itère sur chaque éléments du tableau et on associe la couleur.
-	for (const auto& i : mData.data()) {
-		if (i == GridTeamH::CellType::alive) {
-			*s_ptr &= 0;						// Clear
-			*s_ptr |= MAX_ALPHA << 24;			// Alpha = 255
-			*s_ptr |= mAliveColor.red << 16;
-			*s_ptr |= mAliveColor.green << 8;
-			*s_ptr |= mAliveColor.blue;
-		}
-		else {
-			*s_ptr &= 0;
-			*s_ptr |= MAX_ALPHA << 24;
-			*s_ptr |= mDeadColor.red << 16;
-			*s_ptr |= mDeadColor.green << 8;
-			*s_ptr |= mDeadColor.blue;
-		}
+	// On itère sur chaque éléments du tableau et on associe la couleur.
+	for (size_t index{ width() + 2 };
+		index < (width() + 2) * (height() + 1);
+		index++) {
+
+		if (mData.isInBorder(index))
+			continue;
+
+		auto var = static_cast<uint8_t>(grid[index]);
+
+		*s_ptr &= 0;						// Clear
+		*s_ptr |= MAX_ALPHA << 24;			// Alpha = 255
+
+		*s_ptr |= mAliveColor.red * var << 16;
+		*s_ptr |= mAliveColor.green * var << 8;
+		*s_ptr |= mAliveColor.blue * var;
+
+		*s_ptr |= mDeadColor.red * (1 - var) << 16;
+		*s_ptr |= mDeadColor.green * (1 - var) << 8;
+		*s_ptr |= mDeadColor.blue * (1 - var);
 
 		s_ptr++;
-
-		// Sanity check, pour éviter des problèmes
-		if (s_ptr >= e_ptr)
-			break;
 	}
 }
 

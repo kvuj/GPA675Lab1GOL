@@ -45,6 +45,6 @@ private:
 	GridTeamH mData;
 	Color mDeadColor, mAliveColor;
 
-	// Fonction utilisée à l'interne.
+	// Fonctions utilisées à l'interne.
 	std::optional<unsigned char> convertCharToNumber(const char c);
 };

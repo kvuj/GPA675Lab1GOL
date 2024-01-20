@@ -26,6 +26,7 @@ public:
 	size_t width() const;
 	size_t height() const;
 	size_t size() const;
+	size_t realSize() const;
 
 	void resize(size_t width, size_t height, CellType initValue = CellType{});
 
@@ -39,6 +40,9 @@ public:
 	// Accesseurs du "buffer" de la grille
 	DataType const& data() const;
 	DataType& data();
+	
+	DataType const& intData() const;
+	DataType& intData();
 
 	size_t totalDead() const;
 	float totalDeadRel() const;
@@ -46,12 +50,19 @@ public:
 	size_t totalAlive() const;
 	float totalAliveRel() const;
 
-	void fill(CellType value);
-	void fillAternately(CellType initValue);
-	void randomize(double percentAlive);
+	void fill(CellType value, bool fillBorder);
+	void fillAternately(CellType initValue, bool fillBorder);
+	void randomize(double percentAlive, bool fillBorder);
+
+	void fillBorder(CellType value);
+	void fillBorderWarped();
+	void fillBorderMirror();
+
+	void switchToIntermediate();
+	bool isInBorder(size_t index) const;
 
 private:
-	DataType mData;
+	DataType mData, mIntermediateData;
 	size_t mWidth, mHeight;
 	
 	// Pour la génération de nombres aléatoires
@@ -59,3 +70,11 @@ private:
 	std::mt19937 mEngine;
 	std::uniform_real_distribution<> mDistribution;
 };
+
+inline bool GridTeamH::isInBorder(size_t index) const
+{
+	return(index % (mWidth + 2) < 1
+		|| index % (mWidth + 2) > mWidth
+		|| index < mWidth + 2
+		|| index > (mWidth + 2) * (mHeight + 1));
+}
