@@ -138,7 +138,7 @@ void GridTeamH::randomize(double percentAlive)
 //sans changer les autres case
 void GridTeamH::setBorderValue(CellType initValue)
 {
-	
+
 	// Boucle pour parcourir chaque ligne de la grille
 	for (size_t row = 0; row < mHeight; row++) {
 		// Boucle pour parcourir chaque colonne de la grille

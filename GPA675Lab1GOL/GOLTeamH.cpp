@@ -2,7 +2,6 @@
 
 
 
-
 //Inlining des acesseur dans GOLTeam.h
 
 
@@ -225,7 +224,7 @@ void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
 	switch (borderManagement)
 	{
 	case BorderManagement::immutableAsIs:
-		// Aucune action nécessaire, les cellules du contour restent inchangées
+		
 		break;
 
 	case BorderManagement::foreverDead:
@@ -244,6 +243,7 @@ void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
 		
 		break;
 	}
+	mIteration = 0;
 }
 
 
