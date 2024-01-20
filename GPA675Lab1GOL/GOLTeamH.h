@@ -6,8 +6,11 @@
 #include <bitset>
 #include <GOL.h>
 #include "GridTeamH.h"
+<<<<<<< HEAD
+=======
 
 constexpr unsigned char MAX_ALPHA = 255;
+>>>>>>> 42a4f5dfba2d2df6f34eecb5fb19fea8a70afc9c
 
 class GOLTeamH : public GOL
 {
@@ -15,7 +18,7 @@ public:
 	size_t width() const override;
 	size_t height() const override;
 	size_t size() const override;
-	State state(int x, int y) const override;
+	State state(int x, int y) const override; //details L'�tat d'une cellule peut �tre mort ou vivant.
 	std::string rule() const override;
 	BorderManagement borderManagement() const override;
 	Color color(State state) const override;
@@ -40,11 +43,18 @@ private:
 	std::optional<BorderManagement> mBorderManagement;
 	std::optional<IterationType> mIteration;
 
+<<<<<<< HEAD
+	Grid mData;
+	std::string mRule;
+};
+
+=======
 	// On utilise un bitset qui contient les règles de chaque nombre.
 	std::bitset<9> mParsedRuleRevive, mParsedRuleSurvive;
 	GridTeamH mData;
 	Color mDeadColor, mAliveColor;
 
-	// Fonctions utilisées à l'interne.
+	// Fonction utilisée à l'interne.
 	std::optional<unsigned char> convertCharToNumber(const char c);
 };
+>>>>>>> 42a4f5dfba2d2df6f34eecb5fb19fea8a70afc9c
