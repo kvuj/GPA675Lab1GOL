@@ -338,6 +338,10 @@ bool GOLTeamH::setFromPattern(std::string const& pattern)
 	//! \param color La nouvelle couleur de l'état.
 void GOLTeamH::setSolidColor(State state, Color const& color)
 {
+	if (state == State::alive)
+		mAliveColor = color;
+	else
+		mDeadColor = color;
 
 }
 
