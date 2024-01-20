@@ -95,11 +95,12 @@ bool GOLTeamH::setRule(std::string const& rule)
 			continue;
 		}
 
-		// On vérifie qu'il y ait un backslash avec un char après.
+		// S'il n'y a pas de chiffre, on vérifie qu'il y ait 
+		// un backslash avec un S après.
 		if (firstPart && rule[i] == '/' && rule.size() > i + 1
 			&& (rule[i + 1] == 'S' || rule[i + 1] == 's')) {
-			i++; // On saute le S
-			firstPart = false;
+			i++;				// On saute le S
+			firstPart = false;	// Deuxième partie
 			continue;
 		}
 		else // Aucun slash + s, alors pas bon.
@@ -168,10 +169,15 @@ void GOLTeamH::setSolidColor(State state, Color const& color)
 		mAliveColor = color;
 }
 
-// TODO
+// TODO: performance
 void GOLTeamH::processOneStep()
 {
-	
+	// On commence à itérer sur les côtés. En règlant ces cas particuliers, on 
+	// peut éviter des branches dans la boucle principale. Le branch predictor
+	// aime cela.
+	for (size_t i{}; i < mData.width(); ++i) {
+		
+	}
 }
 
 void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
@@ -182,6 +188,7 @@ void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 	auto s_ptr = buffer;
 	auto e_ptr = &buffer[buffer_size];
 
+	 // On itère sur chaque éléments du tableau et on associe la couleur.
 	for (const auto& i : mData.data()) {
 		if (i == GridTeamH::CellType::alive) {
 			*s_ptr &= 0;						// Clear
@@ -197,10 +204,11 @@ void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 			*s_ptr |= mDeadColor.green << 8;
 			*s_ptr |= mDeadColor.blue;
 		}
+
 		s_ptr++;
 
-		// Sanity check
-		if (s_ptr > e_ptr)
+		// Sanity check, pour éviter des problèmes
+		if (s_ptr >= e_ptr)
 			break;
 	}
 }

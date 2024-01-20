@@ -40,9 +40,11 @@ private:
 	std::optional<BorderManagement> mBorderManagement;
 	std::optional<IterationType> mIteration;
 
-	GridTeamH mData;
+	// On utilise un bitset qui contient les règles de chaque nombre.
 	std::bitset<9> mParsedRuleRevive, mParsedRuleSurvive;
+	GridTeamH mData;
 	Color mDeadColor, mAliveColor;
 
+	// Fonction utilisée à l'interne.
 	std::optional<unsigned char> convertCharToNumber(const char c);
 };
