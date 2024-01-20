@@ -23,9 +23,9 @@ public:
 	~GridTeamH();
 
 	// Accesseurs et mutateurs de la grille
-	size_t width() const;
-	size_t height() const;
-	size_t size() const;
+	size_t width() const {return mWidth; }
+	size_t height() const { return mHeight; }
+	size_t size() const { return mWidth * mHeight; }
 
 	void resize(size_t width, size_t height, CellType initValue = CellType{});
 

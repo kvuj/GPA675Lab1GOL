@@ -22,24 +22,10 @@ GridTeamH::~GridTeamH()
 
 }
 
+//Inlining de ces assesseur dans GridTeam.h
 // Accesseur retournant la largeur de la grille.
-size_t GridTeamH::width() const
-{
-	return mWidth;
-}
-
-
 // Accesseur retournant la hauteur de la grille.
-size_t GridTeamH::height() const
-{
-	return mHeight;
-}
-
 // Accesseur retournant le nombre de cellule de la grille (la taille de la grille).
-size_t GridTeamH::size() const
-{
-	return mWidth * mHeight;
-}
 
 
 // Mutateur modifiant la taille de la grille et initialise le contenu par la valeur spécifiée.
