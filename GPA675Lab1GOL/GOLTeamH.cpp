@@ -3,82 +3,10 @@
 
 
 
-
-//! \brief Accesseur retournant la largeur de la grille de simualtion.
-	//! 
-	//! \return La largeur de la grille.
-	//! 
-size_t GOLTeamH::width() const
-{
-	return mData.width();
-}
+//Inlining des acesseur dans GOLTeam.h
 
 
 
-//! \brief Accesseur retournant la hauteur de la grille de simualtion.
-	//! 
-	//! \return La hauteur de la grille.
-	//!
-size_t GOLTeamH::height() const
-{
-	return mData.height();
-}
-
-//! \brief Accesseur retournant le nombre total de cellules de la grille 
-	//! de simualtion.
-	//! 
-	//! \return Le nombre total de cellules de la grille.
-size_t GOLTeamH::size() const
-{
-	return mData.size();
-}
-
-//! \brief Accesseur retournant l'état d'une cellule.
-	//! 
-	//! \details Cette fonction ne valide pas les entrées pour une raison de 
-	//! performance.
-	//! L'origine est le coin supérieur gauche de la grille.
-	//! 
-	//! \param x La coordonnée en x de la cellule.
-	//! \param y La coordonnée en y de la cellule.
-	//! \return L'état de la cellule.
-GOL::State GOLTeamH::state(int x, int y) const
-{
-	return mData.value(x, y);
-}
-
-//! \brief Accesseur retournant la chaîne de caractères correspondant à 
-	//! la règle courante.
-	//! 
-	//! \details La chaîne de caractères est de la forme "B###/S###".
-	//! 
-	//! \return La chaîne de caractères correspondant à la règle courante selon 
-	//! le format `B###.../S###...`.
-
-std::string GOLTeamH::rule() const
-{
-	return mRule.value_or(std::move(std::string()));
-}
-
-//! \brief Accesseur retournant la stratégie courante de gestion des bords.
-	//! 
-	//! \return La stratégie courante de gestion des bords.
-GOL::BorderManagement GOLTeamH::borderManagement() const
-{
-	return mBorderManagement.value_or(GOL::BorderManagement::immutableAsIs);
-}
-
-//! \brief Accesseur retournant la couleur d'un état.
-	//! 
-	//! \details Cette fonction retourne la couleur associée à l'état passé
-	//! en argument.
-	//! 
-	//! \param state L'état dont on veut connaître la couleur.
-	//! \return La couleur associée à l'état.
-GOL::Color GOLTeamH::color(State state) const
-{
-	return state == GOL::State::alive ? mAliveColor : mDeadColor;
-}
 
 //! \brief Accesseurs retournant des informations générales sur la 
 	//! simulation en cours.
