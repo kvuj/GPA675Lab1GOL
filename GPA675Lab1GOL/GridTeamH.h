@@ -49,10 +49,11 @@ public:
 	void fillAternately(CellType initValue);
 	void randomize(double percentAlive);
 
-private:																		// 
-	DataType mData;																// Il y a des attributs essentiels au fonctionnement de cette classe.
-	size_t mWidth, mHeight;														// À vous de les déterminer. 
-	// Pour la génération de nombres aléatoires
+	void setBorderValue(CellType value);
+
+private:																		
+	DataType mData;																
+	size_t mWidth, mHeight;											//hauteur et largeur de la grid				
 	std::random_device mRandomDevice;
 	std::mt19937 mEngine;
 	std::uniform_real_distribution<> mDistribution;

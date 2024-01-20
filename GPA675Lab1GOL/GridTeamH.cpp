@@ -133,3 +133,22 @@ void GridTeamH::randomize(double percentAlive)
 			i = CellType::dead;
 	}
 }
+
+//Fonction qui attribue CellType aux case de la grille présent en bordure
+//sans changer les autres case
+void GridTeamH::setBorderValue(CellType initValue)
+{
+	
+	// Boucle pour parcourir chaque ligne de la grille
+	for (size_t row = 0; row < mHeight; row++) {
+		// Boucle pour parcourir chaque colonne de la grille
+		for (size_t col = 0; col < mWidth; col++) {
+			// Calcul de l'index dans la grille bidimensionnelle
+			size_t index = row * mWidth + col;
+
+			// Alternance de la valeur pour chaque cellule en fonction de la ligne et de la colonne
+			if (row == 0 || row == mHeight - 1 || col == 0 || col == mWidth - 1)
+				mData[index] = initValue;
+		}
+	}
+}

@@ -220,7 +220,30 @@ bool GOLTeamH::setRule(std::string const& rule)
 	//! **grille**.
 void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
 {
-	mBorderManagement = borderManagement;	
+	mBorderManagement = borderManagement;	// On assigne la nouvelle stratégie
+	// Logique spécifique à chaque stratégie de gestion de bord
+	switch (borderManagement)
+	{
+	case BorderManagement::immutableAsIs:
+		// Aucune action nécessaire, les cellules du contour restent inchangées
+		break;
+
+	case BorderManagement::foreverDead:
+		mData.setBorderValue(State::dead);
+		break;
+
+	case BorderManagement::foreverAlive:
+		mData.setBorderValue(State::alive);
+		break;
+
+	case BorderManagement::warping:
+		
+		break;
+
+	case BorderManagement::mirror:
+		
+		break;
+	}
 }
 
 
