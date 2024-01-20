@@ -413,7 +413,7 @@ void GOLTeamH::setSolidColor(State state, Color const& color)
 
 }
 
-<<<<<<< HEAD
+
 //! \details Cette fonction constitue la partie centrale de la simulation.
 	//! Elle est responsable de faire évoluer la grille d'une itération.
 	//! 
@@ -427,9 +427,8 @@ void GOLTeamH::setSolidColor(State state, Color const& color)
 	//! Après l'appel de cette fonction, la grille est mise à jour avec le 
 	//! nouvel état de chaque cellule suivant l'état précédent. Les statistiques 
 	//! doivent tenir compte de cette évolution.
-=======
+
 // TODO: performance
->>>>>>> 42a4f5dfba2d2df6f34eecb5fb19fea8a70afc9c
 void GOLTeamH::processOneStep()
 {
 	// On commence à itérer sur les côtés. En règlant ces cas particuliers, on 
@@ -440,7 +439,6 @@ void GOLTeamH::processOneStep()
 	}
 }
 
-<<<<<<< HEAD
 
 //! \brief Fonction dessinant l'état de la simulation sur une image passée 
 	//! en paramètre. 
@@ -475,8 +473,7 @@ void GOLTeamH::processOneStep()
 	//! 
 	//! \param buffer Le tableau de pixels de l'image.
 	//! \param buffer_size La taille du tableau de pixels.
-=======
->>>>>>> 42a4f5dfba2d2df6f34eecb5fb19fea8a70afc9c
+
 void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 {
 	if (buffer == nullptr)

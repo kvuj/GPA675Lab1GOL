@@ -6,11 +6,8 @@
 #include <bitset>
 #include <GOL.h>
 #include "GridTeamH.h"
-<<<<<<< HEAD
-=======
 
 constexpr unsigned char MAX_ALPHA = 255;
->>>>>>> 42a4f5dfba2d2df6f34eecb5fb19fea8a70afc9c
 
 class GOLTeamH : public GOL
 {
@@ -43,12 +40,7 @@ private:
 	std::optional<BorderManagement> mBorderManagement;
 	std::optional<IterationType> mIteration;
 
-<<<<<<< HEAD
-	Grid mData;
-	std::string mRule;
-};
 
-=======
 	// On utilise un bitset qui contient les règles de chaque nombre.
 	std::bitset<9> mParsedRuleRevive, mParsedRuleSurvive;
 	GridTeamH mData;
@@ -57,4 +49,3 @@ private:
 	// Fonction utilisée à l'interne.
 	std::optional<unsigned char> convertCharToNumber(const char c);
 };
->>>>>>> 42a4f5dfba2d2df6f34eecb5fb19fea8a70afc9c

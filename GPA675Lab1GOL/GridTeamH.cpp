@@ -92,12 +92,6 @@ GridTeamH::DataType const& GridTeamH::data() const
 {
 	return mData;
 }
-// Accesseur en lecture/écriture sur le "buffer" de la grille.
-GridTeamH::DataType& GridTeamH::data()
-
-{
-	return mData;
-}
 
 // https://en.cppreference.com/w/cpp/algorithm/count
 size_t GridTeamH::totalDead() const

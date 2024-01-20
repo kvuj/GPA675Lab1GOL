@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <vector>
 #include <random>
-
 #include "GOL.h"
+
 
 class GridTeamH
 {
@@ -56,3 +56,4 @@ private:																		//
 	std::random_device mRandomDevice;
 	std::mt19937 mEngine;
 	std::uniform_real_distribution<> mDistribution;
+};
