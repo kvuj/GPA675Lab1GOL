@@ -108,10 +108,20 @@ void GridTeamH::fill(CellType value)
 
 void GridTeamH::fillAternately(CellType initValue)
 {
+	// Détermine la valeur opposée à initValue
 	auto otherValue = (initValue == CellType::alive) ? CellType::dead : CellType::alive;
 
-	for (size_t i{}; i < mData.size(); i++)
-		mData[i] = !(i % 2) ? initValue : otherValue;
+	// Boucle pour parcourir chaque ligne de la grille
+	for (size_t row = 0; row < mHeight; row++) {
+		// Boucle pour parcourir chaque colonne de la grille
+		for (size_t col = 0; col < mWidth; col++) {
+			// Calcul de l'index dans la grille bidimensionnelle
+			size_t index = row * mWidth + col;
+
+			// Alternance de la valeur pour chaque cellule en fonction de la ligne et de la colonne
+			mData[index] = ((row + col) % 2 == 0) ? initValue : otherValue;
+		}
+	}
 }
 
 void GridTeamH::randomize(double percentAlive)
