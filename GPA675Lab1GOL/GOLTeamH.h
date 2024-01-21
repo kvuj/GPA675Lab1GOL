@@ -12,13 +12,14 @@ constexpr unsigned char MAX_ALPHA = 255;
 class GOLTeamH : public GOL
 {
 public:
-	size_t width() const override;
-	size_t height() const override;
-	size_t size() const override;
-	State state(int x, int y) const override;
-	std::string rule() const override;
-	BorderManagement borderManagement() const override;
-	Color color(State state) const override;
+	// inline puisque trivial.
+	size_t width() const override { return mData.width(); }
+	size_t height() const override { return mData.height(); }
+	size_t size() const override { return mData.size(); }
+	State state(int x, int y) const override { return mData.value(x, y); }
+	std::string rule() const override { return mRule.value_or(std::move(std::string())); }
+	BorderManagement borderManagement() const override { return mBorderManagement.value_or(GOL::BorderManagement::immutableAsIs); }
+	Color color(State state) const override { return state == GOL::State::alive ? mAliveColor : mDeadColor; }
 	Statistics statistics() const override;
 	ImplementationInformation information() const override;
 
