@@ -1,4 +1,4 @@
-#include "GOLTeamH.h"
+﻿#include "GOLTeamH.h"
 
 
 
@@ -42,11 +42,11 @@ GOL::Statistics GOLTeamH::statistics() const
 		.width = width(),
 		.height = height(),
 		.totalCells = size(),
-		.iteration = mIteration,
-		.totalDeadAbs = mData.totalDead(),
-		.totalAliveAbs = mData.totalAlive(),
-		.totalDeadRel = mData.totalDeadRel(),
-		.totalAliveRel = mData.totalAliveRel()
+		.iteration = mIteration
+		//.totalDeadAbs = mData.totalDead(),
+		//.totalAliveAbs = mData.totalAlive(),
+		//.totalDeadRel = mData.totalDeadRel(),
+		//.totalAliveRel = mData.totalAliveRel()
 		// .tendencyAbs = ...,
 		// .tendencyRel = ...
 		});
@@ -146,11 +146,11 @@ bool GOLTeamH::setRule(std::string const& rule)
 {
 	mRule = rule;
 	bool firstPart{ true };
-	std::bitset<9> parsedRuleRevive, parsedRuleSurvive;
+	uint16_t parsedRuleRevive{}, parsedRuleSurvive{};
 
 	// On vérifie que la chaine de charactères contient un B au début.
 	// 5 = taille minimale
-	if (rule.size() < 5 || !(rule[0] == 'B' || rule[0] == 'b'))
+	if (rule.size() < 3 || !(rule[0] == 'B' || rule[0] == 'b'))
 		return false;
 
 	for (size_t i{ 1 }; i < rule.length(); i++) {
@@ -160,9 +160,9 @@ bool GOLTeamH::setRule(std::string const& rule)
 		// Si c'est un chiffre, on continue en enregistrant la valeur.
 		if (opt.has_value()) {
 			if (firstPart)
-				parsedRuleRevive.set(opt.value());
+				parsedRuleRevive |= 1u << opt.value();
 			else
-				parsedRuleSurvive.set(opt.value());
+				parsedRuleSurvive |= 1u << opt.value();
 
 			continue;
 		}
@@ -179,14 +179,9 @@ bool GOLTeamH::setRule(std::string const& rule)
 			return false;
 	}
 
-	// Si les les deux règles ont au moins un nombre, alors OK.
-	if (parsedRuleRevive.any() && parsedRuleSurvive.any()) {
-		mParsedRuleRevive = parsedRuleRevive;
-		mParsedRuleSurvive = parsedRuleSurvive;
-		return true;
-	}
-	else
-		return false;
+	mParsedRuleRevive = parsedRuleRevive;
+	mParsedRuleSurvive = parsedRuleSurvive;
+	return true;
 }
 
 //! \brief Mutateur modifiant la stratégie de gestion de bord.
@@ -219,31 +214,23 @@ bool GOLTeamH::setRule(std::string const& rule)
 	//! **grille**.
 void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
 {
-	mBorderManagement = borderManagement;	// On assigne la nouvelle stratégie
-	// Logique spécifique à chaque stratégie de gestion de bord
-	switch (borderManagement)
-	{
-	case BorderManagement::immutableAsIs:
-		
-		break;
+	mBorderManagement = borderManagement;
+	mIteration = 0;
 
-	case BorderManagement::foreverDead:
-		mData.setBorderValue(State::dead);
+	switch (borderManagement) {
+	case GOL::BorderManagement::foreverDead:
+		mData.fillBorder(GridTeamH::CellType::dead);
 		break;
-
-	case BorderManagement::foreverAlive:
-		mData.setBorderValue(State::alive);
+	case GOL::BorderManagement::foreverAlive:
+		mData.fillBorder(GridTeamH::CellType::alive);
 		break;
-
-	case BorderManagement::warping:
-		
+	case GOL::BorderManagement::warping:
+		mData.fillBorderWarped();
 		break;
-
-	case BorderManagement::mirror:
-		
+	case GOL::BorderManagement::mirror:
+		mData.fillBorderMirror();
 		break;
 	}
-	mIteration = 0;
 }
 
 
@@ -272,7 +259,7 @@ void GOLTeamH::setState(int x, int y, State state)
 	//! \param state L'état d'initialisation des cellules.
 void GOLTeamH::fill(State state)
 {
-	mData.fill(state);
+	mData.fill(state, mBorderManagement == GOL::BorderManagement::immutableAsIs);
 	mIteration = 0;
 }
 
@@ -288,7 +275,7 @@ void GOLTeamH::fill(State state)
 	//! \param firstCell L'état de la première cellule.
 void GOLTeamH::fillAlternately(State firstCell)
 {
-	mData.fillAternately(firstCell);
+	mData.fillAternately(firstCell, mBorderManagement == GOL::BorderManagement::immutableAsIs);
 	mIteration = 0;
 }
 
@@ -305,7 +292,7 @@ void GOLTeamH::fillAlternately(State firstCell)
 	//! vivante. La valeur doit être comprise entre 0.0 et 1.0 inclusivement.
 void GOLTeamH::randomize(double percentAlive)
 {
-	mData.randomize(percentAlive);
+	mData.randomize(percentAlive, mBorderManagement == GOL::BorderManagement::immutableAsIs);
 	mIteration = 0;
 }
 
@@ -326,7 +313,9 @@ void GOLTeamH::randomize(double percentAlive)
 	//! \param centerX La coordonnée en x de la grille où se trouve centré le patron.
 	//! \param centerY La coordonnée en y de la grille où se trouve centré le patron.
 	//! \return true si le patron est valide, false sinon.
-	//! 
+	//!
+
+// TODO
 bool GOLTeamH::setFromPattern(std::string const& pattern, int centerX, int centerY)
 {
 	mIteration = 0;
@@ -343,6 +332,8 @@ bool GOLTeamH::setFromPattern(std::string const& pattern, int centerX, int cente
 	//! 
 	//! \param pattern Le patron à appliquer.
 	//! \return true si le patron est valide, false sinon.
+
+// TODO
 bool GOLTeamH::setFromPattern(std::string const& pattern)
 {
 	mIteration = 0;
@@ -383,14 +374,71 @@ void GOLTeamH::setSolidColor(State state, Color const& color)
 	//! nouvel état de chaque cellule suivant l'état précédent. Les statistiques 
 	//! doivent tenir compte de cette évolution.
 
-// TODO: performance
 void GOLTeamH::processOneStep()
 {
-	// On commence à itérer sur les côtés. En règlant ces cas particuliers, on 
-	// peut éviter des branches dans la boucle principale. Le branch predictor
-	// aime cela.
-	for (size_t i{}; i < mData.width(); ++i) {
-		
+	// Pour des raisons de performance, on accède à la grille interne en faisant
+	// des calculs pour le border manuellement.
+	auto& grid{ mData.data() };
+	auto& intGrid{ mData.intData() };
+
+	if (mBorderManagement == GOL::BorderManagement::foreverDead) {
+		size_t aliveCount{};
+		size_t offset{ width() + 2 };
+		auto* ptrGrid{ &grid[0] };				// Pointeur qui se promène en mémoire.
+		auto* const ptrGridInt{ &intGrid[0] };	// Pointeur statique pour des calculs.
+
+		for (size_t i{}; i < mData.realSize() - offset - 1; ++i) {
+
+			if (mData.isInBorder(i)) {
+				ptrGrid++;
+				continue;
+			}
+
+			aliveCount = 0;
+
+			// On prend avantage du fait que GOL::State::alive = 1 et donc
+			// on retire des branches if.
+
+			// Top
+			ptrGrid -= offset + 1;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			ptrGrid++;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			ptrGrid++;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+
+			// Milieu
+			ptrGrid += offset - 2;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			ptrGrid += 2;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+
+
+			// Dessous
+			ptrGrid += offset - 2;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			ptrGrid++;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			ptrGrid++;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+
+			// On retourne à une place plus loin qu'à l'origine.
+			ptrGrid -= offset;
+
+			// On prend avantage du fait que GOL::State::alive = 1.
+			// 
+			// On évite aussi d'utiliser l'opérateur []. En profilant, nous avons vu un
+			// impact de performance de ~5%.
+			if (*(ptrGrid - 1) == GOL::State::alive)
+				*(ptrGridInt + i) = static_cast<GOL::State>(static_cast<bool>(mParsedRuleSurvive & (1u << aliveCount)));
+			else
+				*(ptrGridInt + i) = static_cast<GOL::State>(static_cast<bool>(mParsedRuleRevive & (1u << aliveCount)));
+
+		}
+		ptrGrid = nullptr;
+
+		mData.switchToIntermediate();
+		mIteration.value()++;
 	}
 }
 
@@ -436,29 +484,30 @@ void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 
 	auto s_ptr = buffer;
 	auto e_ptr = &buffer[buffer_size];
+	auto& grid = mData.data();
 
-	 // On itère sur chaque éléments du tableau et on associe la couleur.
-	for (const auto& i : mData.data()) {
-		if (i == GridTeamH::CellType::alive) {
-			*s_ptr &= 0;						// Clear
-			*s_ptr |= MAX_ALPHA << 24;			// Alpha = 255
-			*s_ptr |= mAliveColor.red << 16;
-			*s_ptr |= mAliveColor.green << 8;
-			*s_ptr |= mAliveColor.blue;
-		}
-		else {
-			*s_ptr &= 0;
-			*s_ptr |= MAX_ALPHA << 24;
-			*s_ptr |= mDeadColor.red << 16;
-			*s_ptr |= mDeadColor.green << 8;
-			*s_ptr |= mDeadColor.blue;
-		}
+	// On itère sur chaque éléments du tableau et on associe la couleur.
+	for (size_t index{ width() + 2 };			// On ignore la ligne du bas.
+		index < (width() + 2) * (height() + 1); // On ignore la ligne du haut.
+		index++) {
+
+		if (mData.isInBorder(index))
+			continue;
+
+		auto var = static_cast<uint8_t>(grid[index]);
+
+		*s_ptr &= 0;						// Clear
+		*s_ptr |= MAX_ALPHA << 24;			// Alpha = 255
+
+		*s_ptr |= mAliveColor.red * var << 16;
+		*s_ptr |= mAliveColor.green * var << 8;
+		*s_ptr |= mAliveColor.blue * var;
+
+		*s_ptr |= mDeadColor.red * (1 - var) << 16;
+		*s_ptr |= mDeadColor.green * (1 - var) << 8;
+		*s_ptr |= mDeadColor.blue * (1 - var);
 
 		s_ptr++;
-
-		// Sanity check, pour éviter des problèmes
-		if (s_ptr >= e_ptr)
-			break;
 	}
 }
 
