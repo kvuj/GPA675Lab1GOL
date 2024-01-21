@@ -56,7 +56,7 @@ std::optional<GridTeamH::CellType> GridTeamH::at(int column, int row) const
 }
 
 
-// Mutateur modifiant la valeur d'une cellule à une certaine coordonn e.
+// Mutateur modifiant la valeur d'une cellule à une certaine coordonnée.
 void GridTeamH::setAt(int column, int row, CellType value)
 {
 	if (column > mWidth || row > mHeight)
