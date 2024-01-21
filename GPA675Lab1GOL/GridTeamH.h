@@ -83,7 +83,7 @@ private:
 };
 
 // Attention: performance terrible si utilisation. Seulement lorsque vitesse
-// n'est pas demandée.
+// n'est pas demandée, donc pas dans la boucle principale.
 inline bool GridTeamH::isInBorder(size_t index) const
 {
 	return(index % (mWidth + 2) < 1

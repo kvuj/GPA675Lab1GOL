@@ -12,6 +12,8 @@ constexpr unsigned char MAX_ALPHA = 255;
 class GOLTeamH : public GOL
 {
 public:
+	GOLTeamH();
+
 	// inline puisque trivial.
 	size_t width() const override { return mData.width(); }
 	size_t height() const override { return mData.height(); }
@@ -43,7 +45,14 @@ private:
 
 	// On utilise un bitset qui contient les règles de chaque nombre.
 	// On n'utilise pas std::bitset pour des raisons de performance.
-	uint16_t mParsedRuleRevive, mParsedRuleSurvive;
+	//
+	// Le premier 8 bits (à gauche) est celui de la règle de survie alors
+	// qu'à droite nous avons la règle de réanimation.
+	// 0000000111000111 0000000110011001
+	// ^^^^^^^          ^^^^^^^
+	//     Bits non utilisés
+	//
+	uint32_t mParsedRule;
 
 	GridTeamH mData;
 	Color mDeadColor, mAliveColor;

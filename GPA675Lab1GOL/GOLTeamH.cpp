@@ -1,11 +1,9 @@
 ﻿#include "GOLTeamH.h"
 
-
-
-//Inlining des acesseur dans GOLTeam.h
-
-
-
+GOLTeamH::GOLTeamH()
+	: mParsedRule{}
+{
+}
 
 //! \brief Accesseurs retournant des informations générales sur la 
 	//! simulation en cours.
@@ -146,7 +144,7 @@ bool GOLTeamH::setRule(std::string const& rule)
 {
 	mRule = rule;
 	bool firstPart{ true };
-	uint16_t parsedRuleRevive{}, parsedRuleSurvive{};
+	uint32_t parsedRule{};
 
 	// On vérifie que la chaine de charactères contient un B au début.
 	// 5 = taille minimale
@@ -160,9 +158,9 @@ bool GOLTeamH::setRule(std::string const& rule)
 		// Si c'est un chiffre, on continue en enregistrant la valeur.
 		if (opt.has_value()) {
 			if (firstPart)
-				parsedRuleRevive |= 1u << opt.value();
+				parsedRule |= 1u << opt.value();
 			else
-				parsedRuleSurvive |= 1u << opt.value();
+				parsedRule |= 1u << (opt.value() + 16);
 
 			continue;
 		}
@@ -179,8 +177,7 @@ bool GOLTeamH::setRule(std::string const& rule)
 			return false;
 	}
 
-	mParsedRuleRevive = parsedRuleRevive;
-	mParsedRuleSurvive = parsedRuleSurvive;
+	mParsedRule |= parsedRule;
 	return true;
 }
 
@@ -384,56 +381,61 @@ void GOLTeamH::processOneStep()
 	if (mBorderManagement == GOL::BorderManagement::foreverDead) {
 		size_t aliveCount{};
 		size_t offset{ width() + 2 };
-		auto* ptrGrid{ &grid[0] };				// Pointeur qui se promène en mémoire.
-		auto* const ptrGridInt{ &intGrid[0] };	// Pointeur statique pour des calculs.
+		auto width{ mData.width() }, height{ mData.height() };
 
-		for (size_t i{}; i < mData.realSize() - offset - 1; ++i) {
+		// Index commence à la première case qui n'est pas dans le border
+		auto* ptrGridInt{ &intGrid[width + 3] };		// Pointeur du tableau intermédiaire.
+		auto* ptrGrid{ &grid[width + 3] };				// Pointeur qui se promène en mémoire.
 
-			if (mData.isInBorder(i)) {
+		for (size_t j{}; j < height; ++j) {
+			for (size_t i{}; i < width; ++i) {
+
+				aliveCount = 0;
+
+				// Top
+				ptrGrid -= offset + 1;
+				aliveCount += static_cast<uint8_t> (*ptrGrid);
 				ptrGrid++;
-				continue;
+				aliveCount += static_cast<uint8_t> (*ptrGrid);
+				ptrGrid++;
+				aliveCount += static_cast<uint8_t> (*ptrGrid);
+
+				// Milieu
+				ptrGrid += offset - 2;
+				aliveCount += static_cast<uint8_t> (*ptrGrid);
+				ptrGrid += 2;
+				aliveCount += static_cast<uint8_t> (*ptrGrid);
+
+
+				// Dessous
+				ptrGrid += offset - 2;
+				aliveCount += static_cast<uint8_t> (*ptrGrid);
+				ptrGrid++;
+				aliveCount += static_cast<uint8_t> (*ptrGrid);
+				ptrGrid++;
+				aliveCount += static_cast<uint8_t> (*ptrGrid);
+
+				// On retourne à une place plus loin qu'à l'origine.
+				ptrGrid -= offset;
+				ptrGridInt++;
+
+				// On prend avantage du fait que GOL::State::alive = 1.
+				// 
+				// On évite aussi d'utiliser l'opérateur []. En profilant, nous avons vu un
+				// impact de performance de ~5%.
+				//
+				// On accède à la bonne partie des bits et on compare si le bit de survie/réanimation est
+				// présent. Voir GOLTeamH.cpp pour plus de détails.
+				*(ptrGridInt - 1) = static_cast<GOL::State>(
+					static_cast<bool>(
+						(mParsedRule >> static_cast<bool>(*(ptrGrid - 1)) * 16) & (1u << aliveCount)
+						)
+					);
 			}
 
-			aliveCount = 0;
-
-			// On prend avantage du fait que GOL::State::alive = 1 et donc
-			// on retire des branches if.
-
-			// Top
-			ptrGrid -= offset + 1;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
-			ptrGrid++;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
-			ptrGrid++;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
-
-			// Milieu
-			ptrGrid += offset - 2;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			// On saute le border
 			ptrGrid += 2;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
-
-
-			// Dessous
-			ptrGrid += offset - 2;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
-			ptrGrid++;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
-			ptrGrid++;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
-
-			// On retourne à une place plus loin qu'à l'origine.
-			ptrGrid -= offset;
-
-			// On prend avantage du fait que GOL::State::alive = 1.
-			// 
-			// On évite aussi d'utiliser l'opérateur []. En profilant, nous avons vu un
-			// impact de performance de ~5%.
-			if (*(ptrGrid - 1) == GOL::State::alive)
-				*(ptrGridInt + i) = static_cast<GOL::State>(static_cast<bool>(mParsedRuleSurvive & (1u << aliveCount)));
-			else
-				*(ptrGridInt + i) = static_cast<GOL::State>(static_cast<bool>(mParsedRuleRevive & (1u << aliveCount)));
-
+			ptrGridInt += 2;
 		}
 		ptrGrid = nullptr;
 
@@ -483,31 +485,31 @@ void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 		return;
 
 	auto s_ptr = buffer;
-	auto e_ptr = &buffer[buffer_size];
+
 	auto& grid = mData.data();
+	auto width{ mData.width() }, height{ mData.height() };
+	auto* ptrGrid{ &grid[width + 3] };						// Pointeur qui se promène en mémoire.
 
 	// On itère sur chaque éléments du tableau et on associe la couleur.
-	for (size_t index{ width() + 2 };			// On ignore la ligne du bas.
-		index < (width() + 2) * (height() + 1); // On ignore la ligne du haut.
-		index++) {
+	for (size_t j{}; j < height; ++j) {
+		for (size_t i{}; i < width; ++i) {
+			auto var = static_cast<uint8_t>(*ptrGrid);
 
-		if (mData.isInBorder(index))
-			continue;
+			*s_ptr &= 0;						// Clear
+			*s_ptr |= MAX_ALPHA << 24;			// Alpha = 255
 
-		auto var = static_cast<uint8_t>(grid[index]);
+			*s_ptr |= mAliveColor.red * var << 16;
+			*s_ptr |= mAliveColor.green * var << 8;
+			*s_ptr |= mAliveColor.blue * var;
 
-		*s_ptr &= 0;						// Clear
-		*s_ptr |= MAX_ALPHA << 24;			// Alpha = 255
+			*s_ptr |= mDeadColor.red * (1 - var) << 16;
+			*s_ptr |= mDeadColor.green * (1 - var) << 8;
+			*s_ptr |= mDeadColor.blue * (1 - var);
 
-		*s_ptr |= mAliveColor.red * var << 16;
-		*s_ptr |= mAliveColor.green * var << 8;
-		*s_ptr |= mAliveColor.blue * var;
-
-		*s_ptr |= mDeadColor.red * (1 - var) << 16;
-		*s_ptr |= mDeadColor.green * (1 - var) << 8;
-		*s_ptr |= mDeadColor.blue * (1 - var);
-
-		s_ptr++;
+			s_ptr++;
+			ptrGrid++;
+		}
+		ptrGrid += 2;
 	}
 }
 
