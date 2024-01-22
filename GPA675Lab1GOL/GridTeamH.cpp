@@ -34,13 +34,13 @@ void GridTeamH::resize(size_t width, size_t height, CellType initValue)
 // Accesseur retournant la valeur d'une cellule à une certaine coordonnée.
 GridTeamH::CellType GridTeamH::value(int column, int row) const
 {
-	return mData[(row - 1) * mWidth + (column - 1)];
+	return mData[(static_cast<unsigned long long>(row) - 1) * mWidth + (static_cast<unsigned long long>(column) - 1)];
 }
 
 // Mutateur modifiant la valeur d'une cellule à une certaine coordonnée.
 void GridTeamH::setValue(int column, int row, CellType value)
 {
-	mData[(row - 1) * mWidth + (column - 1)] = value;
+	mData[(static_cast<unsigned long long>(row) - 1) * mWidth + (static_cast<unsigned long long>(column) - 1)] = value;
 }
 
 // Accesseur retournant la valeur d'une cellule à une certaine coordonnée. 
