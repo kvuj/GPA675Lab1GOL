@@ -9,11 +9,6 @@
 	Cette classe fonctionne en ayant deux std::vector qui contiennent les statuts
 	des cellules. Un vecteur intermédiaire est échangé avec .swap() avec le vecteur
 	réel lors des calculs.
-
-	On utilise une grandeur de width + 2 par height + 2. Cela nous permet d'avoir un
-	contour qui sera modifié de façon dynamique par la règle du border. Cela est
-	complètement transparent aux fonctions publiques autres que certaines fonctions
-	spécialisées.
 */
 
 class GridTeamH
@@ -37,7 +32,6 @@ public:
 	size_t width() const { return mWidth; }
 	size_t height() const { return mHeight; }
 	size_t size() const { return mHeight * mWidth; }
-	size_t realSize() const { return (mHeight + 2) * (mWidth + 2); }
 
 	void resize(size_t width, size_t height, CellType initValue = CellType{});
 
@@ -70,7 +64,6 @@ public:
 	void fillBorderMirror();
 
 	void switchToIntermediate();
-	bool isInBorder(size_t index) const;
 
 private:
 	DataType mData, mIntermediateData;
@@ -81,13 +74,3 @@ private:
 	std::mt19937 mEngine;
 	std::uniform_real_distribution<> mDistribution;
 };
-
-// Attention: performance terrible si utilisation. Seulement lorsque vitesse
-// n'est pas demandée, donc pas dans la boucle principale.
-inline bool GridTeamH::isInBorder(size_t index) const
-{
-	return(index % (mWidth + 2) < 1
-		|| index % (mWidth + 2) > mWidth
-		|| index < mWidth + 2
-		|| index >(mWidth + 2) * (mHeight + 1));
-}

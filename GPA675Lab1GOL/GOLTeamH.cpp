@@ -4,7 +4,6 @@ GOLTeamH::GOLTeamH()
 	: mParsedRule{}
 {
 }
-
 //! \brief Accesseurs retournant des informations générales sur la 
 	//! simulation en cours.
 	//! 
@@ -209,6 +208,9 @@ bool GOLTeamH::setRule(std::string const& rule)
 	//!     	
 	//! BorderManagement::warping utilise les voisins opposés par rapport à la 
 	//! **grille**.
+
+
+// TODO: Changer le tableau intermédiaire aussi.
 void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
 {
 	mBorderManagement = borderManagement;
@@ -353,7 +355,6 @@ void GOLTeamH::setSolidColor(State state, Color const& color)
 		mAliveColor = color;
 	else
 		mDeadColor = color;
-
 }
 
 
@@ -373,75 +374,73 @@ void GOLTeamH::setSolidColor(State state, Color const& color)
 
 void GOLTeamH::processOneStep()
 {
-	// Pour des raisons de performance, on accède à la grille interne en faisant
-	// des calculs pour le border manuellement.
-	auto& grid{ mData.data() };
-	auto& intGrid{ mData.intData() };
+	// Pour des raisons de performance, on accède à la grille interne.
+	//
+	// Les variables suivantes sont utilisées afin d'éviter des appels de fonctions
+	// qui peuvent prendre beaucoup de temps.
+	auto const widthNoBorder{ mData.width() - 2 }, heightNoBorder{ mData.height() - 2 };
+	auto const offset{ mData.width() };
 
-	if (mBorderManagement == GOL::BorderManagement::foreverDead) {
-		size_t aliveCount{};
-		size_t offset{ width() + 2 };
-		auto width{ mData.width() }, height{ mData.height() };
+	size_t aliveCount{};
 
-		// Index commence à la première case qui n'est pas dans le border
-		auto* ptrGridInt{ &intGrid[width + 3] };		// Pointeur du tableau intermédiaire.
-		auto* ptrGrid{ &grid[width + 3] };				// Pointeur qui se promène en mémoire.
+	// On commence à la première case qui n'est pas dans le border
+	auto* ptrGridInt{ (&(mData.intData()[0])) + (offset + 1) };			// Pointeur du tableau intermédiaire.
+	auto* ptrGrid{ &(mData.data()[0]) };								// Pointeur qui se promène en mémoire.
 
-		for (size_t j{}; j < height; ++j) {
-			for (size_t i{}; i < width; ++i) {
+	for (size_t j{}; j < heightNoBorder; ++j) {
+		for (size_t i{}; i < widthNoBorder; ++i) {
 
-				aliveCount = 0;
+			aliveCount = 0;
 
-				// Top
-				ptrGrid -= offset + 1;
-				aliveCount += static_cast<uint8_t> (*ptrGrid);
-				ptrGrid++;
-				aliveCount += static_cast<uint8_t> (*ptrGrid);
-				ptrGrid++;
-				aliveCount += static_cast<uint8_t> (*ptrGrid);
+			// Top
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			ptrGrid++;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			ptrGrid++;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
 
-				// Milieu
-				ptrGrid += offset - 2;
-				aliveCount += static_cast<uint8_t> (*ptrGrid);
-				ptrGrid += 2;
-				aliveCount += static_cast<uint8_t> (*ptrGrid);
-
-
-				// Dessous
-				ptrGrid += offset - 2;
-				aliveCount += static_cast<uint8_t> (*ptrGrid);
-				ptrGrid++;
-				aliveCount += static_cast<uint8_t> (*ptrGrid);
-				ptrGrid++;
-				aliveCount += static_cast<uint8_t> (*ptrGrid);
-
-				// On retourne à une place plus loin qu'à l'origine.
-				ptrGrid -= offset;
-				ptrGridInt++;
-
-				// On prend avantage du fait que GOL::State::alive = 1.
-				// 
-				// On évite aussi d'utiliser l'opérateur []. En profilant, nous avons vu un
-				// impact de performance de ~5%.
-				//
-				// On accède à la bonne partie des bits et on compare si le bit de survie/réanimation est
-				// présent. Voir GOLTeamH.cpp pour plus de détails.
-				*(ptrGridInt - 1) = static_cast<GOL::State>(
-					static_cast<bool>(
-						(mParsedRule >> static_cast<bool>(*(ptrGrid - 1)) * 16) & (1u << aliveCount)
-						)
-					);
-			}
-
-			// On saute le border
+			// Milieu
+			ptrGrid += offset - 2;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
 			ptrGrid += 2;
-			ptrGridInt += 2;
-		}
-		ptrGrid = nullptr;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
 
-		mData.switchToIntermediate();
-		mIteration.value()++;
+
+			// Dessous
+			ptrGrid += offset - 2;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			ptrGrid++;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			ptrGrid++;
+			aliveCount += static_cast<uint8_t> (*ptrGrid);
+
+			// On retourne à une place plus loin qu'à l'origine.
+			ptrGrid -= (2 * offset) + 1;
+			ptrGridInt++;
+
+			// On prend avantage du fait que GOL::State::alive = 1.
+			// 
+			// On évite aussi d'utiliser l'opérateur []. En profilant, nous avons vu un
+			// impact de performance de ~5%.
+			//
+			// On accède à la bonne partie des bits et on compare si le bit de survie/réanimation est
+			// présent. Voir GOLTeamH.cpp pour plus de détails.
+			*(ptrGridInt - 1) = static_cast<GOL::State>(
+				static_cast<bool>(
+					(mParsedRule >> static_cast<bool>(*(ptrGrid + offset)) * 16) & (1u << aliveCount)
+					)
+				);
+		}
+
+		// On saute le border
+		ptrGrid += 2;
+		ptrGridInt += 2;
 	}
+	ptrGrid = nullptr;
+	ptrGridInt = nullptr;
+
+	mData.switchToIntermediate();
+	mIteration.value()++;
 }
 
 
@@ -484,33 +483,32 @@ void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 	if (buffer == nullptr)
 		return;
 
-	auto s_ptr = buffer;
+	auto* s_ptr = buffer;
 
-	auto& grid = mData.data();
 	auto width{ mData.width() }, height{ mData.height() };
-	auto* ptrGrid{ &grid[width + 3] };						// Pointeur qui se promène en mémoire.
+	auto* ptrGrid{ &mData.data()[0] };						// Pointeur qui se promène en mémoire.
+	auto var = static_cast<uint8_t>(*ptrGrid);					// Variable qui va décoder l'état d'une cellule.
 
 	// On itère sur chaque éléments du tableau et on associe la couleur.
-	for (size_t j{}; j < height; ++j) {
-		for (size_t i{}; i < width; ++i) {
-			auto var = static_cast<uint8_t>(*ptrGrid);
+	for (size_t j{}; j < height * width; ++j) {
+		var = static_cast<uint8_t>(*ptrGrid);
 
-			*s_ptr &= 0;						// Clear
-			*s_ptr |= MAX_ALPHA << 24;			// Alpha = 255
+		*s_ptr &= 0;						// Clear
+		*s_ptr |= MAX_ALPHA << 24;			// Alpha = 255
 
-			*s_ptr |= mAliveColor.red * var << 16;
-			*s_ptr |= mAliveColor.green * var << 8;
-			*s_ptr |= mAliveColor.blue * var;
+		*s_ptr |= mAliveColor.red * var << 16;
+		*s_ptr |= mAliveColor.green * var << 8;
+		*s_ptr |= mAliveColor.blue * var;
 
-			*s_ptr |= mDeadColor.red * (1 - var) << 16;
-			*s_ptr |= mDeadColor.green * (1 - var) << 8;
-			*s_ptr |= mDeadColor.blue * (1 - var);
+		*s_ptr |= mDeadColor.red * (1 - var) << 16;
+		*s_ptr |= mDeadColor.green * (1 - var) << 8;
+		*s_ptr |= mDeadColor.blue * (1 - var);
 
-			s_ptr++;
-			ptrGrid++;
-		}
-		ptrGrid += 2;
+		s_ptr++;
+		ptrGrid++;
 	}
+	s_ptr = nullptr;
+	ptrGrid = nullptr;
 }
 
 std::optional<unsigned char> GOLTeamH::convertCharToNumber(const char c)

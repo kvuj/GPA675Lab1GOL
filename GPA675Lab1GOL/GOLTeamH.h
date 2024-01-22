@@ -19,9 +19,10 @@ public:
 	size_t height() const override { return mData.height(); }
 	size_t size() const override { return mData.size(); }
 	State state(int x, int y) const override { return mData.value(x, y); }
-	std::string rule() const override { return mRule.value_or(std::move(std::string())); }
+	std::string rule() const override { return mRule.value_or(std::string()); }
 	BorderManagement borderManagement() const override { return mBorderManagement.value_or(GOL::BorderManagement::immutableAsIs); }
 	Color color(State state) const override { return state == GOL::State::alive ? mAliveColor : mDeadColor; }
+
 	Statistics statistics() const override;
 	ImplementationInformation information() const override;
 
@@ -46,7 +47,7 @@ private:
 	// On utilise un bitset qui contient les règles de chaque nombre.
 	// On n'utilise pas std::bitset pour des raisons de performance.
 	//
-	// Le premier 8 bits (à gauche) est celui de la règle de survie alors
+	// Le premier 16 bits (à gauche) est celui de la règle de survie alors
 	// qu'à droite nous avons la règle de réanimation.
 	// 0000000111000111 0000000110011001
 	// ^^^^^^^          ^^^^^^^

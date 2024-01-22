@@ -23,10 +23,10 @@ GridTeamH::~GridTeamH()
 // Mutateur modifiant la taille de la grille et initialise le contenu par la valeur spécifiée.
 void GridTeamH::resize(size_t width, size_t height, CellType initValue)
 {
-	mData.resize((width + 2) * (height + 2));
-	mIntermediateData.resize((width + 2) * (width + 2));
 	mWidth = width;
 	mHeight = height;
+	mData.resize((width * height) + width);
+	mIntermediateData.resize((width * height) + width);
 
 	fill(initValue, false);
 }
@@ -34,15 +34,13 @@ void GridTeamH::resize(size_t width, size_t height, CellType initValue)
 // Accesseur retournant la valeur d'une cellule à une certaine coordonnée.
 GridTeamH::CellType GridTeamH::value(int column, int row) const
 {
-	size_t offset{ mWidth + 2 };
-	return mData[offset * row + (column - 1)];
+	return mData[(row - 1) * mWidth + (column - 1)];
 }
 
 // Mutateur modifiant la valeur d'une cellule à une certaine coordonnée.
 void GridTeamH::setValue(int column, int row, CellType value)
 {
-	size_t offset{ mWidth + 2 };
-	mData[offset * row + (column - 1)] = value;
+	mData[(row - 1) * mWidth + (column - 1)] = value;
 }
 
 // Accesseur retournant la valeur d'une cellule à une certaine coordonnée. 
@@ -51,8 +49,7 @@ std::optional<GridTeamH::CellType> GridTeamH::at(int column, int row) const
 	if (column >= mWidth || row >= mHeight)
 		return std::nullopt;
 
-	size_t offset{ mWidth + 2 };
-	return mData[offset * row + (column - 1)];
+	return mData[(row - 1) * mWidth + (column - 1)];
 }
 
 
@@ -62,8 +59,7 @@ void GridTeamH::setAt(int column, int row, CellType value)
 	if (column > mWidth || row > mHeight)
 		return;
 
-	size_t offset{ mWidth + 2 };
-	mData[offset * row + (column - 1)] = value;
+	mData[(row - 1) * mWidth + (column - 1)] = value;
 }
 
 
@@ -89,7 +85,7 @@ GridTeamH::DataType& GridTeamH::intData()
 	return mIntermediateData;
 }
 
-// TODO: FIX
+// TODO: FIX performance
 // https://en.cppreference.com/w/cpp/algorithm/count
 size_t GridTeamH::totalDead() const
 {
@@ -119,11 +115,10 @@ void GridTeamH::fill(CellType value, bool fillBorder)
 			i = value;
 	}
 	else {
-		for (size_t index{}; index < mData.size(); index++) {
-			if (isInBorder(index))
-				continue;
-
-			mData[index] = value;
+		for (size_t i{ 1 }; i < mWidth - 1; i++) {
+			for (size_t j{ 1 }; j < mHeight - 1; ++j) {
+				mData[i + (j * mWidth)] = value;
+			}
 		}
 	}
 }
@@ -139,11 +134,10 @@ void GridTeamH::fillAternately(CellType initValue, bool fillBorder)
 			mData[i] = !(i % 2) ? initValue : otherValue;
 	}
 	else {
-		for (size_t index{}; index < mData.size(); index++) {
-			if (isInBorder(index))
-				continue;
-
-			mData[index] = !(index % 2) ? initValue : otherValue;
+		for (size_t i{ 1 }; i < mWidth - 1; i++) {
+			for (size_t j{ 1 }; j < mHeight - 1; ++j) {
+				mData[i + (j * mWidth)] = !(i % 2) ? initValue : otherValue;
+			}
 		}
 	}
 }
@@ -152,32 +146,48 @@ void GridTeamH::randomize(double percentAlive, bool fillBorder)
 {
 	if (fillBorder) {
 		for (auto& i : mData) {
-			if (mDistribution(mEngine) < percentAlive)
-				i = CellType::alive;
-			else
-				i = CellType::dead;
+			i = static_cast<GridTeamH::CellType>(mDistribution(mEngine) < percentAlive);
 		}
 	}
 	else {
-		for (size_t index{}; index < mData.size() - 1; index++) {
-			if (isInBorder(index))
-				continue;
-
-			if (mDistribution(mEngine) < percentAlive)
-				mData[index] = CellType::alive;
-			else
-				mData[index] = CellType::dead;
+		for (size_t i{ 1 }; i < mWidth - 1; i++) {
+			for (size_t j{ 1 }; j < mHeight - 1; ++j) {
+				mData[i + (j * mWidth)] = static_cast<GridTeamH::CellType>(mDistribution(mEngine) < percentAlive);
+			}
 		}
 	}
 }
 
-
-// Performance non nécessaire.
 void GridTeamH::fillBorder(CellType value)
 {
-	for (size_t index{}; index < mData.size(); index++) {
-		if (isInBorder(index))
-			mData[index] = value;
+	auto* ptr = &mData.front();
+	auto* e_ptr = &mData.front() + mWidth;
+
+	// TOP
+	while (ptr < e_ptr) {
+		*ptr = value;
+		ptr++;
+	}
+
+	// DROITE
+	e_ptr += mWidth * mHeight;
+	while (ptr < e_ptr) {
+		*ptr = value;
+		ptr += mWidth;
+	}
+
+	// DESSOUS
+	e_ptr -= mWidth;
+	while (ptr > e_ptr) {
+		*ptr = value;
+		ptr--;
+	}
+
+	// GAUCHE
+	e_ptr -= mWidth * mHeight;
+	while (ptr > e_ptr) {
+		*ptr = value;
+		ptr -= mWidth;
 	}
 }
 
@@ -198,4 +208,5 @@ void GridTeamH::switchToIntermediate()
 	// Swap pour la performance.
 	mData.swap(mIntermediateData);
 }
+
 
