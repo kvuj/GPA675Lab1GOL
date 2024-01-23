@@ -130,15 +130,13 @@ void GridTeamH::fill(CellType value, bool fillBorder)
 			mData[i + (j * mWidth)] = value;
 }
 
-// TODO: FIX LES COLONNES EN FAISANT ATTENTION AU BORDER
-// TIMOTHEE: Je m'en occupe.
 void GridTeamH::fillAternately(CellType initValue, bool fillBorder)
 {
 	auto otherValue = (initValue == CellType::alive) ? CellType::dead : CellType::alive;
 
 	for (size_t i{ static_cast<size_t>(1) - fillBorder }; i < mWidth - (static_cast<size_t>(1) - fillBorder); i++)
 		for (size_t j{ static_cast<size_t>(1) - fillBorder }; j < mHeight - (static_cast<size_t>(1) - fillBorder); ++j)
-			mData[i + (j * mWidth)] = !(i % 2) ? initValue : otherValue;
+			mData[i + (j * mWidth)] = !((i + j) % 2) ? initValue : otherValue;
 }
 
 void GridTeamH::randomize(double percentAlive, bool fillBorder)
