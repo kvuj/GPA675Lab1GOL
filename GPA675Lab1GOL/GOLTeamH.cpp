@@ -389,7 +389,7 @@ void GOLTeamH::processOneStep()
 	auto const widthNoBorder{ mData.width() - 2 }, heightNoBorder{ mData.height() - 2 };
 	auto const offset{ mData.width() };
 
-	size_t neighbourAliveCount{}, aliveCount{};
+	size_t neighboursAliveCount{}, aliveCount{};
 
 	// On commence à la première case qui n'est pas dans le border
 	// Pointeur du tableau intermédiaire.
@@ -401,29 +401,29 @@ void GOLTeamH::processOneStep()
 	for (size_t j{ 1 }; j < heightNoBorder + 1; ++j) {
 		for (size_t i{ 1 }; i < widthNoBorder + 1; ++i) {
 
-			neighbourAliveCount = 0;
+			neighboursAliveCount = 0;
 
 			// Top
-			neighbourAliveCount += *ptrGrid;
+			neighboursAliveCount += *ptrGrid;
 			ptrGrid++;
-			neighbourAliveCount += *ptrGrid;
+			neighboursAliveCount += *ptrGrid;
 			ptrGrid++;
-			neighbourAliveCount += *ptrGrid;
+			neighboursAliveCount += *ptrGrid;
 
 			// Milieu
 			ptrGrid += offset - 2;
-			neighbourAliveCount += *ptrGrid;
+			neighboursAliveCount += *ptrGrid;
 			ptrGrid += 2;
-			neighbourAliveCount += *ptrGrid;
+			neighboursAliveCount += *ptrGrid;
 
 
 			// Dessous
 			ptrGrid += offset - 2;
-			neighbourAliveCount += *ptrGrid;
+			neighboursAliveCount += *ptrGrid;
 			ptrGrid++;
-			neighbourAliveCount += *ptrGrid;
+			neighboursAliveCount += *ptrGrid;
 			ptrGrid++;
-			neighbourAliveCount += *ptrGrid;
+			neighboursAliveCount += *ptrGrid;
 
 			// On retourne à une place plus loin qu'à l'origine.
 			ptrGrid -= (2 * offset) + 1;
@@ -437,7 +437,7 @@ void GOLTeamH::processOneStep()
 			// On accède à la bonne partie des bits et on compare si le bit de survie/réanimation est
 			// présent. Voir GOLTeamH.cpp pour plus de détails.
 			*(ptrGridInt - 1) = static_cast<bool>(
-				(mParsedRule >> static_cast<bool>(*(ptrGrid + offset)) * 16) & (1u << neighbourAliveCount)
+				(mParsedRule >> static_cast<bool>(*(ptrGrid + offset)) * 16) & (1u << neighboursAliveCount)
 				);
 
 			if (*(ptrGridInt - 1))
