@@ -25,7 +25,7 @@ GridTeamH::~GridTeamH()
 // Mutateur modifiant la taille de la grille et initialise le contenu par la valeur spécifiée.
 void GridTeamH::resize(size_t width, size_t height, CellType initValue)
 {
-	// On exige que si mData soit null, mIntermediateData le soi aussi.
+	// On exige que si mData soit null, mIntermediateData le soit aussi.
 	if (mData)
 		dealloc();
 
