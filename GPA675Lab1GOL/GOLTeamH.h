@@ -58,7 +58,7 @@ private:
 
 	GridTeamH mData;
 	Color mDeadColor, mAliveColor;
-	uint32_t mDeadColorEncoded, mAliveColorEncoded;
+	uint64_t mColorEncoded;
 
 	// Fonctions utilisées à l'interne.
 	std::optional<unsigned char> convertCharToNumber(const char c);

@@ -1,7 +1,7 @@
 ﻿#include "GOLTeamH.h"
 
 GOLTeamH::GOLTeamH()
-	: mParsedRule{}, mDeadColorEncoded{}, mAliveColorEncoded{}
+	: mParsedRule{}, mColorEncoded{}
 {
 }
 //! \brief Accesseurs retournant des informations générales sur la 
@@ -351,18 +351,14 @@ bool GOLTeamH::setFromPattern(std::string const& pattern)
 	//! \param color La nouvelle couleur de l'état.
 void GOLTeamH::setSolidColor(State state, Color const& color)
 {
-	if (state == State::alive) {
+	if (state == State::alive)
 		mAliveColor = color;
-		mAliveColorEncoded |= mAliveColor.red << 16;
-		mAliveColorEncoded |= mAliveColor.green << 8;
-		mAliveColorEncoded |= mAliveColor.blue;
-	}
-	else {
+	else
 		mDeadColor = color;
-		mDeadColorEncoded |= mDeadColor.red << 16;
-		mDeadColorEncoded |= mDeadColor.green << 8;
-		mDeadColorEncoded |= mDeadColor.blue;
-	}
+
+	mColorEncoded |= ((static_cast<uint64_t>(mAliveColor.red) << 16) << 32 * static_cast<uint8_t>(state));
+	mColorEncoded |= ((static_cast<uint64_t>(mAliveColor.green) << 8) << 32 * static_cast<uint8_t>(state));
+	mColorEncoded |= (static_cast<uint64_t>(mAliveColor.blue) << 32 * static_cast<uint8_t>(state));
 }
 
 
@@ -510,17 +506,12 @@ void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 
 		*s_ptr &= 0;						// Clear
 		*s_ptr |= MAX_ALPHA << 24;			// Alpha = 255
-
-		if (var) {
-			*s_ptr |= mAliveColorEncoded;
-		}
-		else {
-			*s_ptr |= mDeadColorEncoded;
-		}
+		*s_ptr |= mColorEncoded >> (32 * var);
 
 		s_ptr++;
 		ptrGrid++;
 	}
+
 	s_ptr = nullptr;
 	ptrGrid = nullptr;
 }
