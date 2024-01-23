@@ -25,6 +25,7 @@ GridTeamH::~GridTeamH()
 // Mutateur modifiant la taille de la grille et initialise le contenu par la valeur spécifiée.
 void GridTeamH::resize(size_t width, size_t height, CellType initValue)
 {
+	// On exige que si mData soit null, mIntermediateData le soi aussi.
 	if (mData)
 		dealloc();
 
@@ -124,16 +125,9 @@ float GridTeamH::totalAliveRel() const
 
 void GridTeamH::fill(CellType value, bool fillBorder)
 {
-	if (fillBorder) {
-		for (size_t i{}; i < mWidth; i++)
-			for (size_t j{}; j < mHeight; ++j)
-				mData[i + (j * mWidth)] = value;
-	}
-	else {
-		for (size_t i{ 1 }; i < mWidth - 1; i++)
-			for (size_t j{ 1 }; j < mHeight - 1; ++j)
-				mData[i + (j * mWidth)] = value;
-	}
+	for (size_t i{ static_cast<size_t>(1) - fillBorder }; i < mWidth - (static_cast<size_t>(1) - fillBorder); i++)
+		for (size_t j{ static_cast<size_t>(1) - fillBorder }; j < mHeight - (static_cast<size_t>(1) - fillBorder); ++j)
+			mData[i + (j * mWidth)] = value;
 }
 
 // TODO: FIX LES COLONNES EN FAISANT ATTENTION AU BORDER
@@ -142,32 +136,16 @@ void GridTeamH::fillAternately(CellType initValue, bool fillBorder)
 {
 	auto otherValue = (initValue == CellType::alive) ? CellType::dead : CellType::alive;
 
-	if (fillBorder) {
-		for (size_t i{}; i < mWidth; i++)
-			for (size_t j{}; j < mHeight; ++j)
-				mData[i + (j * mWidth)] = !(i % 2) ? initValue : otherValue;
-	}
-	else {
-		for (size_t i{ 1 }; i < mWidth - 1; i++)
-			for (size_t j{ 1 }; j < mHeight - 1; ++j)
-				mData[i + (j * mWidth)] = !(i % 2) ? initValue : otherValue;
-	}
+	for (size_t i{ static_cast<size_t>(1) - fillBorder }; i < mWidth - (static_cast<size_t>(1) - fillBorder); i++)
+		for (size_t j{ static_cast<size_t>(1) - fillBorder }; j < mHeight - (static_cast<size_t>(1) - fillBorder); ++j)
+			mData[i + (j * mWidth)] = !(i % 2) ? initValue : otherValue;
 }
 
 void GridTeamH::randomize(double percentAlive, bool fillBorder)
 {
-	if (fillBorder) {
-		for (size_t i{}; i < mWidth; i++)
-			for (size_t j{}; j < mHeight; ++j)
-				mData[i + (j * mWidth)] = static_cast<GridTeamH::CellType>(mDistribution(mEngine) < percentAlive);
-	}
-	else {
-		for (size_t i{ 1 }; i < mWidth - 1; i++) {
-			for (size_t j{ 1 }; j < mHeight - 1; ++j) {
-				mData[i + (j * mWidth)] = static_cast<GridTeamH::CellType>(mDistribution(mEngine) < percentAlive);
-			}
-		}
-	}
+	for (size_t i{ static_cast<size_t>(1) - fillBorder }; i < mWidth - (static_cast<size_t>(1) - fillBorder); i++)
+		for (size_t j{ static_cast<size_t>(1) - fillBorder }; j < mHeight - (static_cast<size_t>(1) - fillBorder); ++j)
+			mData[i + (j * mWidth)] = static_cast<GridTeamH::CellType>(mDistribution(mEngine) < percentAlive);
 }
 
 void GridTeamH::fillBorder(CellType value)
