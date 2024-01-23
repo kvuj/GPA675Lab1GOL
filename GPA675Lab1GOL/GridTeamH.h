@@ -15,7 +15,7 @@ class GridTeamH
 public:
 	// Définition des types
 	using CellType = GOL::State;
-	using DataType = std::vector<CellType>;
+	using DataType = CellType *;
 
 	// Définition des constructeurs / destructeur
 	GridTeamH();
@@ -34,6 +34,7 @@ public:
 	size_t aliveCount() const { return mAliveCount;  }
 
 	void resize(size_t width, size_t height, CellType initValue = CellType{});
+	void dealloc();
 
 	// Accesseurs et mutateurs des cellules
 	CellType value(int column, int row) const;
@@ -76,5 +77,5 @@ private:
 	std::mt19937 mEngine;
 	std::uniform_real_distribution<> mDistribution;
 
-	void fillBorderManipulations(CellType* ptr, CellType value) const;
+	void fillBorderManipulations(DataType ptr, CellType value) const;
 };

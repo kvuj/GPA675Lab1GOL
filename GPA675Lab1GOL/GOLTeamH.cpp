@@ -99,6 +99,7 @@ GOL::ImplementationInformation GOLTeamH::information() const
 void GOLTeamH::resize(size_t width, size_t height, State defaultState)
 {
 	mData.resize(width, height, defaultState);
+	drawBorder();
 }
 
 //! \brief Mutateur modifiant la règle de la simulation.
@@ -215,8 +216,12 @@ void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
 {
 	mBorderManagement = borderManagement;
 	mIteration = 0;
+	drawBorder();
+}
 
-	switch (borderManagement) {
+void GOLTeamH::drawBorder()
+{
+	switch (mBorderManagement.value_or(GOL::BorderManagement::foreverDead)) {
 	case GOL::BorderManagement::foreverDead:
 		mData.fillBorder(GridTeamH::CellType::dead);
 		break;
@@ -389,10 +394,10 @@ void GOLTeamH::processOneStep()
 
 	// On commence à la première case qui n'est pas dans le border
 	// Pointeur du tableau intermédiaire.
-	auto* ptrGridInt{ reinterpret_cast<uint8_t*>(&(mData.intData()[0])) + (offset + 1) };
+	auto* ptrGridInt{ reinterpret_cast<uint8_t*>(mData.intData()) + (offset + 1) };
 
 	// Pointeur qui se promène en mémoire.
-	auto* ptrGrid{ reinterpret_cast<uint8_t*>(&(mData.data()[0])) };
+	auto* ptrGrid{ reinterpret_cast<uint8_t*>(mData.data()) };
 
 	for (size_t j{ 1 }; j < heightNoBorder + 1; ++j) {
 		for (size_t i{ 1 }; i < widthNoBorder + 1; ++i) {
@@ -495,7 +500,7 @@ void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 	auto* s_ptr{ buffer }, * e_ptr{ buffer + buffer_size };
 
 	// Pointeur qui se promène en mémoire.
-	auto* ptrGrid{ reinterpret_cast<const uint8_t*>(&mData.data()[0]) };
+	auto* ptrGrid{ reinterpret_cast<const uint8_t*>(mData.data()) };
 
 	// On itère sur chaque éléments du tableau et on associe la couleur.
 	while (s_ptr < e_ptr) {

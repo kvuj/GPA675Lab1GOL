@@ -27,6 +27,7 @@ public:
 	void resize(size_t width, size_t height, State defaultState) override;
 	bool setRule(std::string const& rule) override;
 	void setBorderManagement(BorderManagement borderManagement) override;
+	void drawBorder();
 	void setState(int x, int y, State state) override;
 	void fill(State state) override;
 	void fillAlternately(State firstCell) override;

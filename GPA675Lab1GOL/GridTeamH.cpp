@@ -11,6 +11,7 @@ GridTeamH::GridTeamH()
 
 GridTeamH::GridTeamH(size_t width, size_t height, CellType initValue)
 	:mWidth{ width }, mHeight{ height }, mEngine(mRandomDevice()), mDistribution(0.0, 1.0), mAliveCount{}
+	, mData{}, mIntermediateData{}
 {
 	resize(width, height, initValue);
 }
@@ -18,18 +19,28 @@ GridTeamH::GridTeamH(size_t width, size_t height, CellType initValue)
 // Destructeur Grid
 GridTeamH::~GridTeamH()
 {
-
+	dealloc();
 }
 
 // Mutateur modifiant la taille de la grille et initialise le contenu par la valeur spécifiée.
 void GridTeamH::resize(size_t width, size_t height, CellType initValue)
 {
+	if (mData)
+		dealloc();
+
 	mWidth = width;
 	mHeight = height;
-	mData.resize(width * height);
-	mIntermediateData.resize(width * height);
+
+	mData = new CellType[width * height];
+	mIntermediateData = new CellType[width * height];
 
 	fill(initValue, true);
+}
+
+void GridTeamH::dealloc()
+{
+	delete[] mData;
+	delete[] mIntermediateData;
 }
 
 // Accesseur retournant la valeur d'une cellule à une certaine coordonnée.
@@ -114,15 +125,14 @@ float GridTeamH::totalAliveRel() const
 void GridTeamH::fill(CellType value, bool fillBorder)
 {
 	if (fillBorder) {
-		for (auto& i : mData)
-			i = value;
+		for (size_t i{}; i < mWidth; i++)
+			for (size_t j{}; j < mHeight; ++j)
+				mData[i + (j * mWidth)] = value;
 	}
 	else {
-		for (size_t i{ 1 }; i < mWidth - 1; i++) {
-			for (size_t j{ 1 }; j < mHeight - 1; ++j) {
+		for (size_t i{ 1 }; i < mWidth - 1; i++)
+			for (size_t j{ 1 }; j < mHeight - 1; ++j)
 				mData[i + (j * mWidth)] = value;
-			}
-		}
 	}
 }
 
@@ -133,24 +143,23 @@ void GridTeamH::fillAternately(CellType initValue, bool fillBorder)
 	auto otherValue = (initValue == CellType::alive) ? CellType::dead : CellType::alive;
 
 	if (fillBorder) {
-		for (size_t i{}; i < mData.size(); i++)
-			mData[i] = !(i % 2) ? initValue : otherValue;
+		for (size_t i{}; i < mWidth; i++)
+			for (size_t j{}; j < mHeight; ++j)
+				mData[i + (j * mWidth)] = !(i % 2) ? initValue : otherValue;
 	}
 	else {
-		for (size_t i{ 1 }; i < mWidth - 1; i++) {
-			for (size_t j{ 1 }; j < mHeight - 1; ++j) {
+		for (size_t i{ 1 }; i < mWidth - 1; i++)
+			for (size_t j{ 1 }; j < mHeight - 1; ++j)
 				mData[i + (j * mWidth)] = !(i % 2) ? initValue : otherValue;
-			}
-		}
 	}
 }
 
 void GridTeamH::randomize(double percentAlive, bool fillBorder)
 {
 	if (fillBorder) {
-		for (auto& i : mData) {
-			i = static_cast<GridTeamH::CellType>(mDistribution(mEngine) < percentAlive);
-		}
+		for (size_t i{}; i < mWidth; i++)
+			for (size_t j{}; j < mHeight; ++j)
+				mData[i + (j * mWidth)] = static_cast<GridTeamH::CellType>(mDistribution(mEngine) < percentAlive);
 	}
 	else {
 		for (size_t i{ 1 }; i < mWidth - 1; i++) {
@@ -163,11 +172,11 @@ void GridTeamH::randomize(double percentAlive, bool fillBorder)
 
 void GridTeamH::fillBorder(CellType value)
 {
-	fillBorderManipulations(&mData.front(), value);
-	fillBorderManipulations(&mIntermediateData.front(), value);
+	fillBorderManipulations(mData, value);
+	fillBorderManipulations(mIntermediateData, value);
 }
 
-void GridTeamH::fillBorderManipulations(CellType* ptr, CellType value) const 
+void GridTeamH::fillBorderManipulations(DataType ptr, CellType value) const
 {
 	auto* e_ptr = ptr + (mWidth - 1);
 
@@ -214,7 +223,9 @@ void GridTeamH::fillBorderMirror()
 void GridTeamH::switchToIntermediate()
 {
 	// Swap pour la performance.
-	mData.swap(mIntermediateData);
+	auto* temp{ mData };
+	mData = mIntermediateData;
+	mIntermediateData = temp;
 }
 
 
