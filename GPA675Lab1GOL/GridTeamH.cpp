@@ -1,6 +1,6 @@
 ﻿#include "GridTeamH.h"
 #include "GOL.h"
-#include <iostream>
+#include <algorithm>
 
 // Constructeur Grid par défaut
 GridTeamH::GridTeamH()
@@ -25,8 +25,8 @@ void GridTeamH::resize(size_t width, size_t height, CellType initValue)
 {
 	mWidth = width;
 	mHeight = height;
-	mData.resize((width * height) + width);
-	mIntermediateData.resize((width * height) + width);
+	mData.resize(width * height);
+	mIntermediateData.resize(width * height);
 
 	fill(initValue, false);
 }
@@ -170,21 +170,21 @@ void GridTeamH::fillBorder(CellType value)
 	}
 
 	// DROITE
-	e_ptr += mWidth * mHeight;
+	e_ptr += mWidth * (mHeight - 1);
 	while (ptr < e_ptr) {
 		*ptr = value;
 		ptr += mWidth;
 	}
 
 	// DESSOUS
-	e_ptr -= mWidth;
+	e_ptr -= (mWidth - 1);
 	while (ptr > e_ptr) {
 		*ptr = value;
 		ptr--;
 	}
 
 	// GAUCHE
-	e_ptr -= mWidth * mHeight;
+	e_ptr -= mWidth * (mHeight - 1);
 	while (ptr > e_ptr) {
 		*ptr = value;
 		ptr -= mWidth;

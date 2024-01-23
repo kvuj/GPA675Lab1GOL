@@ -1,9 +1,7 @@
 ﻿#pragma once
 
 #include <string>
-#include <array>
 #include <optional>
-#include <bitset>
 #include <GOL.h>
 #include "GridTeamH.h"
 

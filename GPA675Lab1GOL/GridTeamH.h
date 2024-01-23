@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <algorithm>
 #include <vector>
 #include <random>
 #include "GOL.h"
