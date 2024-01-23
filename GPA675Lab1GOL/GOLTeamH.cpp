@@ -1,7 +1,7 @@
 ﻿#include "GOLTeamH.h"
 
 GOLTeamH::GOLTeamH()
-	: mParsedRule{}
+	: mParsedRule{}, mDeadColorEncoded{}, mAliveColorEncoded{}
 {
 }
 //! \brief Accesseurs retournant des informations générales sur la 
@@ -39,11 +39,11 @@ GOL::Statistics GOLTeamH::statistics() const
 		.width = width(),
 		.height = height(),
 		.totalCells = size(),
-		.iteration = mIteration
-		//.totalDeadAbs = mData.totalDead(),
-		//.totalAliveAbs = mData.totalAlive(),
-		//.totalDeadRel = mData.totalDeadRel(),
-		//.totalAliveRel = mData.totalAliveRel()
+		.iteration = mIteration,
+		.totalDeadAbs = mData.totalDead(),
+		.totalAliveAbs = mData.totalAlive(),
+		.totalDeadRel = mData.totalDeadRel(),
+		.totalAliveRel = mData.totalAliveRel()
 		// .tendencyAbs = ...,
 		// .tendencyRel = ...
 		});
@@ -71,7 +71,8 @@ GOL::ImplementationInformation GOLTeamH::information() const
 {
 	return std::move(ImplementationInformation{
 		.title{"Laboratoire 1"},
-		.authors{{"Timothée Leclaire-Fournier"}, {"Martin Euzenat martin.euzenat.1@ens.etsmtl.ca"}},
+		.authors{{"Timothée Leclaire-Fournier timothee.leclaire-fournier.1@ens.etsmtl.ca"},
+				 {"Martin Euzenat martin.euzenat.1@ens.etsmtl.ca"}},
 		.answers{},
 		.optionnalComments{}
 		// Réponses aux questions...
@@ -210,7 +211,6 @@ bool GOLTeamH::setRule(std::string const& rule)
 	//! **grille**.
 
 
-// TODO: Changer le tableau intermédiaire aussi.
 void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
 {
 	mBorderManagement = borderManagement;
@@ -351,10 +351,18 @@ bool GOLTeamH::setFromPattern(std::string const& pattern)
 	//! \param color La nouvelle couleur de l'état.
 void GOLTeamH::setSolidColor(State state, Color const& color)
 {
-	if (state == State::alive)
+	if (state == State::alive) {
 		mAliveColor = color;
-	else
+		mAliveColorEncoded |= mAliveColor.red << 16;
+		mAliveColorEncoded |= mAliveColor.green << 8;
+		mAliveColorEncoded |= mAliveColor.blue;
+	}
+	else {
 		mDeadColor = color;
+		mDeadColorEncoded |= mDeadColor.red << 16;
+		mDeadColorEncoded |= mDeadColor.green << 8;
+		mDeadColorEncoded |= mDeadColor.blue;
+	}
 }
 
 
@@ -381,38 +389,41 @@ void GOLTeamH::processOneStep()
 	auto const widthNoBorder{ mData.width() - 2 }, heightNoBorder{ mData.height() - 2 };
 	auto const offset{ mData.width() };
 
-	size_t aliveCount{};
+	size_t neighbourAliveCount{}, aliveCount{};
 
 	// On commence à la première case qui n'est pas dans le border
-	auto* ptrGridInt{ (&(mData.intData()[0])) + (offset + 1) };			// Pointeur du tableau intermédiaire.
-	auto* ptrGrid{ &(mData.data()[0]) };								// Pointeur qui se promène en mémoire.
+	// Pointeur du tableau intermédiaire.
+	auto* ptrGridInt{ reinterpret_cast<uint8_t*>(&(mData.intData()[0])) + (offset + 1) };
 
-	for (size_t j{}; j < heightNoBorder; ++j) {
-		for (size_t i{}; i < widthNoBorder; ++i) {
+	// Pointeur qui se promène en mémoire.
+	auto* ptrGrid{ reinterpret_cast<uint8_t*>(&(mData.data()[0])) };
 
-			aliveCount = 0;
+	for (size_t j{ 1 }; j < heightNoBorder + 1; ++j) {
+		for (size_t i{ 1 }; i < widthNoBorder + 1; ++i) {
+
+			neighbourAliveCount = 0;
 
 			// Top
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			neighbourAliveCount += *ptrGrid;
 			ptrGrid++;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			neighbourAliveCount += *ptrGrid;
 			ptrGrid++;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			neighbourAliveCount += *ptrGrid;
 
 			// Milieu
 			ptrGrid += offset - 2;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			neighbourAliveCount += *ptrGrid;
 			ptrGrid += 2;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			neighbourAliveCount += *ptrGrid;
 
 
 			// Dessous
 			ptrGrid += offset - 2;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			neighbourAliveCount += *ptrGrid;
 			ptrGrid++;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			neighbourAliveCount += *ptrGrid;
 			ptrGrid++;
-			aliveCount += static_cast<uint8_t> (*ptrGrid);
+			neighbourAliveCount += *ptrGrid;
 
 			// On retourne à une place plus loin qu'à l'origine.
 			ptrGrid -= (2 * offset) + 1;
@@ -425,11 +436,12 @@ void GOLTeamH::processOneStep()
 			//
 			// On accède à la bonne partie des bits et on compare si le bit de survie/réanimation est
 			// présent. Voir GOLTeamH.cpp pour plus de détails.
-			*(ptrGridInt - 1) = static_cast<GOL::State>(
-				static_cast<bool>(
-					(mParsedRule >> static_cast<bool>(*(ptrGrid + offset)) * 16) & (1u << aliveCount)
-					)
+			*(ptrGridInt - 1) = static_cast<bool>(
+				(mParsedRule >> static_cast<bool>(*(ptrGrid + offset)) * 16) & (1u << neighbourAliveCount)
 				);
+
+			if (*(ptrGridInt - 1))
+				aliveCount++;
 		}
 
 		// On saute le border
@@ -441,6 +453,7 @@ void GOLTeamH::processOneStep()
 
 	mData.switchToIntermediate();
 	mIteration.value()++;
+	mData.setAliveCount(aliveCount);
 }
 
 
@@ -483,26 +496,27 @@ void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 	if (buffer == nullptr)
 		return;
 
-	auto* s_ptr = buffer;
+	auto* s_ptr{ buffer }, * e_ptr{ buffer + buffer_size };
 
-	auto width{ mData.width() }, height{ mData.height() };
-	auto* ptrGrid{ &mData.data()[0] };						// Pointeur qui se promène en mémoire.
-	auto var = static_cast<uint8_t>(*ptrGrid);					// Variable qui va décoder l'état d'une cellule.
+	// Pointeur qui se promène en mémoire.
+	auto* ptrGrid{ reinterpret_cast<const uint8_t*>(&mData.data()[0]) };
+
+	// Variable qui va décoder l'état d'une cellule.
+	auto var{ *ptrGrid };
 
 	// On itère sur chaque éléments du tableau et on associe la couleur.
-	for (size_t j{}; j < height * width; ++j) {
-		var = static_cast<uint8_t>(*ptrGrid);
+	while (s_ptr < e_ptr) {
+		var = *ptrGrid;
 
 		*s_ptr &= 0;						// Clear
 		*s_ptr |= MAX_ALPHA << 24;			// Alpha = 255
 
-		*s_ptr |= mAliveColor.red * var << 16;
-		*s_ptr |= mAliveColor.green * var << 8;
-		*s_ptr |= mAliveColor.blue * var;
-
-		*s_ptr |= mDeadColor.red * (1 - var) << 16;
-		*s_ptr |= mDeadColor.green * (1 - var) << 8;
-		*s_ptr |= mDeadColor.blue * (1 - var);
+		if (var) {
+			*s_ptr |= mAliveColorEncoded;
+		}
+		else {
+			*s_ptr |= mDeadColorEncoded;
+		}
 
 		s_ptr++;
 		ptrGrid++;

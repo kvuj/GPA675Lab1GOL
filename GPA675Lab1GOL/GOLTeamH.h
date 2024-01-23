@@ -47,6 +47,9 @@ private:
 	//
 	// Le premier 16 bits (à gauche) est celui de la règle de survie alors
 	// qu'à droite nous avons la règle de réanimation.
+	// 
+	// Exemple:
+	// 
 	// 0000000111000111 0000000110011001
 	// ^^^^^^^          ^^^^^^^
 	//     Bits non utilisés
@@ -55,6 +58,7 @@ private:
 
 	GridTeamH mData;
 	Color mDeadColor, mAliveColor;
+	uint32_t mDeadColorEncoded, mAliveColorEncoded;
 
 	// Fonctions utilisées à l'interne.
 	std::optional<unsigned char> convertCharToNumber(const char c);

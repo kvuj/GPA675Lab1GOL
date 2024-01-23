@@ -31,6 +31,7 @@ public:
 	size_t width() const { return mWidth; }
 	size_t height() const { return mHeight; }
 	size_t size() const { return mHeight * mWidth; }
+	size_t aliveCount() const { return mAliveCount;  }
 
 	void resize(size_t width, size_t height, CellType initValue = CellType{});
 
@@ -40,6 +41,8 @@ public:
 
 	std::optional<CellType> at(int column, int row) const;
 	void setAt(int column, int row, CellType value);
+
+	void setAliveCount(size_t aliveCount);
 
 	// Accesseurs du "buffer" de la grille
 	DataType const& data() const;
@@ -66,10 +69,12 @@ public:
 
 private:
 	DataType mData, mIntermediateData;
-	size_t mWidth, mHeight;
+	size_t mWidth, mHeight, mAliveCount;
 
 	// Pour la génération de nombres aléatoires
 	std::random_device mRandomDevice;
 	std::mt19937 mEngine;
 	std::uniform_real_distribution<> mDistribution;
+
+	void fillBorderManipulations(CellType* ptr, CellType value) const;
 };

@@ -1,6 +1,7 @@
 ﻿#include "GridTeamH.h"
 #include "GOL.h"
-#include <algorithm>
+
+#include <optional>
 
 // Constructeur Grid par défaut
 GridTeamH::GridTeamH()
@@ -9,7 +10,7 @@ GridTeamH::GridTeamH()
 }
 
 GridTeamH::GridTeamH(size_t width, size_t height, CellType initValue)
-	:mWidth{ width }, mHeight{ height }, mEngine(mRandomDevice()), mDistribution(0.0, 1.0)
+	:mWidth{ width }, mHeight{ height }, mEngine(mRandomDevice()), mDistribution(0.0, 1.0), mAliveCount{}
 {
 	resize(width, height, initValue);
 }
@@ -28,7 +29,7 @@ void GridTeamH::resize(size_t width, size_t height, CellType initValue)
 	mData.resize(width * height);
 	mIntermediateData.resize(width * height);
 
-	fill(initValue, false);
+	fill(initValue, true);
 }
 
 // Accesseur retournant la valeur d'une cellule à une certaine coordonnée.
@@ -62,6 +63,11 @@ void GridTeamH::setAt(int column, int row, CellType value)
 	mData[(row - 1) * mWidth + (column - 1)] = value;
 }
 
+void GridTeamH::setAliveCount(size_t aliveCount)
+{
+	mAliveCount = aliveCount;
+}
+
 
 // Accesseur en lecture seule sur le "buffer" de la grille.
 GridTeamH::DataType const& GridTeamH::data() const
@@ -85,11 +91,9 @@ GridTeamH::DataType& GridTeamH::intData()
 	return mIntermediateData;
 }
 
-// TODO: FIX performance
-// https://en.cppreference.com/w/cpp/algorithm/count
 size_t GridTeamH::totalDead() const
 {
-	return std::count_if(mData.begin(), mData.end(), [](auto& i) { return i == CellType::dead; });
+	return mAliveCount;
 }
 
 float GridTeamH::totalDeadRel() const
@@ -97,10 +101,9 @@ float GridTeamH::totalDeadRel() const
 	return static_cast<float>(totalDead()) / static_cast<float>(size());
 }
 
-// TODO: FIX
 size_t GridTeamH::totalAlive() const
 {
-	return std::count_if(mData.begin(), mData.end(), [](auto& i) { return i == CellType::alive; });
+	return (mWidth * mHeight) - mAliveCount;
 }
 
 float GridTeamH::totalAliveRel() const
@@ -160,8 +163,13 @@ void GridTeamH::randomize(double percentAlive, bool fillBorder)
 
 void GridTeamH::fillBorder(CellType value)
 {
-	auto* ptr = &mData.front();
-	auto* e_ptr = &mData.front() + mWidth;
+	fillBorderManipulations(&mData.front(), value);
+	fillBorderManipulations(&mIntermediateData.front(), value);
+}
+
+void GridTeamH::fillBorderManipulations(CellType* ptr, CellType value) const 
+{
+	auto* e_ptr = ptr + (mWidth - 1);
 
 	// TOP
 	while (ptr < e_ptr) {
