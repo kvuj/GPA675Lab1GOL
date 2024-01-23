@@ -432,9 +432,6 @@ void GOLTeamH::processOneStep()
 
 			// On prend avantage du fait que GOL::State::alive = 1.
 			// 
-			// On évite aussi d'utiliser l'opérateur []. En profilant, nous avons vu un
-			// impact de performance de ~5%.
-			//
 			// On accède à la bonne partie des bits et on compare si le bit de survie/réanimation est
 			// présent. Voir GOLTeamH.cpp pour plus de détails.
 			*(ptrGridInt - 1) = static_cast<bool>(
