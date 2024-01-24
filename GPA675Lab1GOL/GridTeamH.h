@@ -15,15 +15,16 @@ class GridTeamH
 public:
 	// Définition des types
 	using CellType = GOL::State;
-	using DataType = CellType *;
+	using DataType = CellType*;
 
 	// Définition des constructeurs / destructeur
 	GridTeamH();
 	GridTeamH(size_t width, size_t height, CellType initValue = CellType{});
-	GridTeamH(GridTeamH const&) = delete;
-	GridTeamH(GridTeamH&&) = delete;
-	GridTeamH& operator=(GridTeamH const&) = delete;
-	GridTeamH& operator=(GridTeamH&&) = delete;
+
+	GridTeamH(GridTeamH const&);
+	GridTeamH(GridTeamH&&) noexcept;
+	GridTeamH& operator=(GridTeamH const&);
+	GridTeamH& operator=(GridTeamH&&) noexcept;
 	~GridTeamH();
 
 	// Accesseurs et mutateurs de la grille
@@ -31,10 +32,9 @@ public:
 	size_t width() const { return mWidth; }
 	size_t height() const { return mHeight; }
 	size_t size() const { return mHeight * mWidth; }
-	size_t aliveCount() const { return mAliveCount;  }
+	size_t aliveCount() const { return mAliveCount; }
 
 	void resize(size_t width, size_t height, CellType initValue = CellType{});
-	void dealloc();
 
 	// Accesseurs et mutateurs des cellules
 	CellType value(int column, int row) const;
@@ -78,4 +78,5 @@ private:
 	std::uniform_real_distribution<> mDistribution;
 
 	void fillBorderManipulations(DataType ptr, CellType value) const;
+	void dealloc() const;
 };

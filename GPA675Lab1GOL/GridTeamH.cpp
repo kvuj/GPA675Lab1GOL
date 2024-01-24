@@ -2,6 +2,7 @@
 #include "GOL.h"
 
 #include <optional>
+#include <utility>
 
 // Constructeur Grid par défaut
 GridTeamH::GridTeamH()
@@ -14,6 +15,58 @@ GridTeamH::GridTeamH(size_t width, size_t height, CellType initValue)
 	, mData{}, mIntermediateData{}
 {
 	resize(width, height, initValue);
+}
+
+GridTeamH::GridTeamH(GridTeamH const& cpy)
+	: GridTeamH(cpy.width(), cpy.height(), CellType::alive)
+{
+	mAliveCount = cpy.mAliveCount;
+	memcpy(mData, cpy.mData, cpy.size() * sizeof(CellType));
+	memcpy(mIntermediateData, cpy.mIntermediateData, cpy.size() * sizeof(CellType));
+}
+
+// https://learn.microsoft.com/en-us/cpp/cpp/move-constructors-and-move-assignment-operators-cpp
+GridTeamH::GridTeamH(GridTeamH&& mv) noexcept
+{
+	*this = std::move(mv);
+}
+
+GridTeamH& GridTeamH::operator=(GridTeamH const& cpy)
+{
+	// Il ne faut pas se copier soi même.
+	if (this != &cpy) {
+		dealloc();
+
+		mWidth = cpy.mWidth;
+		mHeight = cpy.mHeight;
+		mAliveCount = cpy.mAliveCount;
+
+		memcpy(mData, cpy.mData, cpy.size() * sizeof(CellType));
+		memcpy(mIntermediateData, cpy.mIntermediateData, cpy.size() * sizeof(CellType));
+	}
+
+	return *this;
+}
+
+// https://learn.microsoft.com/en-us/cpp/cpp/move-constructors-and-move-assignment-operators-cpp
+GridTeamH& GridTeamH::operator=(GridTeamH&& mv) noexcept
+{
+	// Il ne faut pas se copier soi même.
+	if (this != &mv) {
+		dealloc();
+
+		mAliveCount = std::move(mv.mAliveCount);
+		mWidth = std::move(mv.mWidth);
+		mHeight = std::move(mv.mHeight);
+		mData = std::move(mv.mData);
+		mIntermediateData = std::move(mv.mIntermediateData);
+
+		// Il faut que le destructeur de l'ancien objet soit valide.
+		mv.mData = nullptr;
+		mv.mIntermediateData = nullptr;
+	}
+
+	return *this;
 }
 
 // Destructeur Grid
@@ -38,10 +91,12 @@ void GridTeamH::resize(size_t width, size_t height, CellType initValue)
 	fill(initValue, true);
 }
 
-void GridTeamH::dealloc()
+void GridTeamH::dealloc() const
 {
-	delete[] mData;
-	delete[] mIntermediateData;
+	if (mData && mIntermediateData) {
+		delete[] mData;
+		delete[] mIntermediateData;
+	}
 }
 
 // Accesseur retournant la valeur d'une cellule à une certaine coordonnée.
