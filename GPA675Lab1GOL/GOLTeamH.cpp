@@ -426,8 +426,8 @@ bool GOLTeamH::setFromPattern(std::string const& pattern)
 	}
 	pos++;
 	
-	size_t centerX = mData.width() / 2;
-	size_t centerY = mData.height() / 2;
+	size_t centerX = mData.width() / 2 - width/2;
+	size_t centerY = mData.height() / 2 - height/2;
 
 	// Remplissage de la grille aux positions spécifiées par le patron
 	for (size_t y = 0; y < height; ++y) {
