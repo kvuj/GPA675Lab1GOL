@@ -4,6 +4,7 @@ GOLTeamH::GOLTeamH()
 	: mParsedRule{}, mColorEncoded{}
 {
 }
+
 //! \brief Accesseurs retournant des informations générales sur la 
 	//! simulation en cours.
 	//! 

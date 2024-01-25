@@ -4,9 +4,11 @@
 #include <optional>
 #include <utility>
 
+
+
 // Constructeur Grid par défaut
 GridTeamH::GridTeamH()
-	: GridTeamH(100, 100, CellType::alive)
+	: GridTeamH(100, 100, CellType::dead)
 {
 }
 
@@ -127,7 +129,7 @@ void GridTeamH::setAt(int column, int row, CellType value)
 	if (column > mWidth || row > mHeight)
 		return;
 
-	mData[(row - 1) * mWidth + (column - 1)] = value;
+	mData[(static_cast<unsigned long long>(row) - 1) * mWidth + (static_cast<unsigned long long>(column) - 1)] = value;
 }
 
 void GridTeamH::setAliveCount(size_t aliveCount)

@@ -1,17 +1,59 @@
 ﻿#pragma once
+#ifndef GOLTEAMH_H
+#define GOLTEAMH_H
+	
 
 #include <string>
 #include <optional>
 #include <GOL.h>
 #include "GridTeamH.h"
 
+// Fichier : GridTeam.h
+// GPA675 – Laboratoire 1 
+// Création :
+// - A. Einstein
+// - 2024/01/17
+// - - - - - - - - - - - - - - - - - - - - - - -
+// Classe GOLTeamH
+// - - - - - - - - - - - - - - - - - - - - - - -
+
+
+
+// La classe point représente une grille dans l’espace 2d des réels.
+// La classe possède les attributs width et y.
+// - ces accesseurs :
+
+// - ces mutateurs :
+
+
+// La classe point représente un point dans l’espace 2d des réels.
+// La classe possède les attributs x et y.
+// - ces accesseurs :
+// double x();
+// double y();
+// - ces mutateurs :
+// void setX(double x);
+// void setY(double y);
+// void set(double x, double y);
+
+
+
 constexpr unsigned char MAX_ALPHA = 255;
 
 class GOLTeamH : public GOL
 {
 public:
+	//  - le constructeur par défaut : _class_()
+	//  - le constructeur d'initialisation proposé : _class_(size_t width, size_t height, State defaultState = State::dead)
+	//  - le destructeur : ~_class_()
 	GOLTeamH();
+	GOLTeamH(GOLTeamH const &) = delete;
+	GOLTeamH(GOLTeamH  &&) = delete;
+	GOLTeamH& operator =(GOLTeamH const &) = delete;
+	GOLTeamH& operator =(GOLTeamH&&) = delete;
 
+	virtual ~GOLTeamH()=default;
+	
 	// inline puisque trivial.
 	size_t width() const override { return mData.width(); }
 	size_t height() const override { return mData.height(); }
@@ -64,3 +106,5 @@ private:
 	// Fonctions utilisées à l'interne.
 	std::optional<unsigned char> convertCharToNumber(const char c);
 };
+
+#endif GOLTEAMH_H

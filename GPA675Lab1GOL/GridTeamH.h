@@ -1,8 +1,29 @@
 ﻿#pragma once
+#ifndef GRIDTEAMH_H
+#define GRIDTEAMH_H
 
 #include <vector>
 #include <random>
 #include "GOL.h"
+
+// Fichier : GridTeam.h
+// GPA675 – Laboratoire 1 
+// Création :
+// - A. Einstein
+// - 2024/01/17
+// - - - - - - - - - - - - - - - - - - - - - - -
+// Classe GridTeamH
+// - - - - - - - - - - - - - - - - - - - - - - -
+
+
+
+
+// La classe point représente une grille dans l’espace 2d des réels.
+// La classe possède les attributs width et y.
+// - ces accesseurs :
+// 
+// - ces mutateurs :
+// 
 
 /*
 	Cette classe fonctionne en ayant deux std::vector qui contiennent les statuts
@@ -80,3 +101,5 @@ private:
 	void fillBorderManipulations(DataType ptr, CellType value) const;
 	void dealloc() const;
 };
+
+#endif GRIDTEAMH_H
