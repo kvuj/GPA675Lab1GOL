@@ -7,6 +7,8 @@
 #include <optional>
 #include <GOL.h>
 #include "GridTeamH.h"
+#include <iostream>
+#include <vector>
 
 // Fichier : GridTeam.h
 // GPA675 – Laboratoire 1 
