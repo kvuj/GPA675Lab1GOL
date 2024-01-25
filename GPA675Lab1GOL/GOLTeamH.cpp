@@ -411,25 +411,21 @@ bool GOLTeamH::setFromPattern(std::string const& pattern)
 		std::cerr << "Erreur de format : 'x' manquant." << std::endl;
 		return false;
 	}
-	pos++;
 	// Lecture de la hauteur
 	size_t height = std::stoi(pattern.substr(pos), &pos);
+	pos = pos + 4;
 	if (height <= 0) {
 		std::cerr << "Erreur de format : Hauteur invalide." << std::endl;
 		return false;
 	}
-	pos++;
+	
 	// Vérification du ']'
 	if (static_cast<char>(pattern[pos++]) != ']') {
 		std::cerr << "Erreur de format : ']' manquant." << std::endl;
 		return false;
 	}
 	pos++;
-	// Vérification de la taille du reste du pattern
-	if (pattern.length() - pos != width * height) {
-		std::cerr << "Erreur de format : Taille du patron incorrecte." << std::endl;
-		return false;
-	}
+	
 	size_t centerX = mData.width() / 2;
 	size_t centerY = mData.height() / 2;
 
@@ -437,6 +433,7 @@ bool GOLTeamH::setFromPattern(std::string const& pattern)
 	for (size_t y = 0; y < height; ++y) {
 		for (size_t x = 0; x < width; ++x) {
 			char cellChar = pattern[pos++];
+			mData.setAt(centerX + x, centerY + y, State::dead);
 			State cellState = (cellChar == '0') ? State::dead : State::alive;
 			mData.setAt(centerX + x, centerY + y, cellState);
 		}
