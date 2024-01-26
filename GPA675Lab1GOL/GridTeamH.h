@@ -96,7 +96,7 @@ private:
 	std::uniform_real_distribution<> mDistribution;
 
 	void fillBorderManipulations(DataType ptr, CellType value) const;
-	void dealloc() const;
+	void dealloc();
 };
 
 #endif GRIDTEAMH_H

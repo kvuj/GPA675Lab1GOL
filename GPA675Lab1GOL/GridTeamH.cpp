@@ -44,6 +44,9 @@ GridTeamH& GridTeamH::operator=(GridTeamH const& cpy)
 		mHeight = cpy.mHeight;
 		mAliveCount = cpy.mAliveCount;
 
+		mData = new CellType[mWidth * mHeight];
+		mIntermediateData = new CellType[mWidth * mHeight];
+
 		memcpy(mData, cpy.mData, cpy.size() * sizeof(CellType));
 		memcpy(mIntermediateData, cpy.mIntermediateData, cpy.size() * sizeof(CellType));
 	}
@@ -81,9 +84,7 @@ GridTeamH::~GridTeamH()
 // Mutateur modifiant la taille de la grille et initialise le contenu par la valeur spécifiée.
 void GridTeamH::resize(size_t width, size_t height, CellType initValue)
 {
-	// On exige que si mData soit null, mIntermediateData le soit aussi.
-	if (mData)
-		dealloc();
+	dealloc();
 
 	mWidth = width;
 	mHeight = height;
@@ -94,12 +95,14 @@ void GridTeamH::resize(size_t width, size_t height, CellType initValue)
 	fill(initValue, true);
 }
 
-void GridTeamH::dealloc() const
+void GridTeamH::dealloc()
 {
 	if (mData && mIntermediateData) {
 		delete[] mData;
 		delete[] mIntermediateData;
 	}
+	mData = nullptr;
+	mIntermediateData = nullptr;
 }
 
 // Accesseur retournant la valeur d'une cellule à une certaine coordonnée.
