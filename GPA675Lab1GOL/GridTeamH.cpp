@@ -13,7 +13,8 @@ GridTeamH::GridTeamH()
 }
 
 GridTeamH::GridTeamH(size_t width, size_t height, CellType initValue)
-	:mWidth{ width }, mHeight{ height }, mEngine(mRandomDevice()), mDistribution(0.0, 1.0), mAliveCount{}
+	:mWidth{ width }, mHeight{ height }, mEngine(mRandomDevice()), mDistribution(0.0, 1.0)
+	, mAliveCount{}, mLastGenAliveCount{}
 	, mData{}, mIntermediateData{}
 {
 	resize(width, height, initValue);
@@ -134,9 +135,9 @@ void GridTeamH::setAt(int column, int row, CellType value)
 
 void GridTeamH::setAliveCount(size_t aliveCount)
 {
+	mLastGenAliveCount = mAliveCount;
 	mAliveCount = aliveCount;
 }
-
 
 // Accesseur en lecture seule sur le "buffer" de la grille.
 GridTeamH::DataType const& GridTeamH::data() const
@@ -162,7 +163,7 @@ GridTeamH::DataType& GridTeamH::intData()
 
 size_t GridTeamH::totalDead() const
 {
-	return mAliveCount;
+	return (mWidth * mHeight) - mAliveCount;
 }
 
 float GridTeamH::totalDeadRel() const
@@ -172,12 +173,42 @@ float GridTeamH::totalDeadRel() const
 
 size_t GridTeamH::totalAlive() const
 {
-	return (mWidth * mHeight) - mAliveCount;
+	return mAliveCount;
 }
 
 float GridTeamH::totalAliveRel() const
 {
 	return static_cast<float>(totalAlive()) / static_cast<float>(size());
+}
+
+size_t GridTeamH::lastGenDead() const
+{
+	return (mWidth * mHeight) - mLastGenAliveCount;
+}
+
+float GridTeamH::lastGenDeadRel() const
+{
+	return static_cast<float>(lastGenDead()) / static_cast<float>(size());
+}
+
+size_t GridTeamH::lastGenAlive() const
+{
+	return mLastGenAliveCount;
+}
+
+float GridTeamH::lastGenAliveRel() const
+{
+	return static_cast<float>(lastGenAlive()) / static_cast<float>(size());
+}
+
+int GridTeamH::tendencyAbs() const
+{
+	return lastGenAlive() - totalAlive();
+}
+
+float GridTeamH::tendencyRel() const
+{
+	return static_cast<float>(tendencyAbs()) / static_cast<float>(size());
 }
 
 void GridTeamH::fill(CellType value, bool fillBorder)
@@ -187,7 +218,7 @@ void GridTeamH::fill(CellType value, bool fillBorder)
 			mData[i + (j * mWidth)] = value;
 }
 
-void GridTeamH::fillAternately(CellType initValue, bool fillBorder)
+void GridTeamH::fillAlternately(CellType initValue, bool fillBorder)
 {
 	auto otherValue = (initValue == CellType::alive) ? CellType::dead : CellType::alive;
 

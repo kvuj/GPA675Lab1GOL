@@ -44,9 +44,9 @@ GOL::Statistics GOLTeamH::statistics() const
 		.totalDeadAbs = mData.totalDead(),
 		.totalAliveAbs = mData.totalAlive(),
 		.totalDeadRel = mData.totalDeadRel(),
-		.totalAliveRel = mData.totalAliveRel()
-		// .tendencyAbs = ...,
-		// .tendencyRel = ...
+		.totalAliveRel = mData.totalAliveRel(),
+		.tendencyAbs = mData.tendencyAbs(),
+		.tendencyRel = mData.tendencyRel()
 		});
 }
 
@@ -284,7 +284,7 @@ void GOLTeamH::fill(State state)
 	//! \param firstCell L'état de la première cellule.
 void GOLTeamH::fillAlternately(State firstCell)
 {
-	mData.fillAternately(firstCell, mBorderManagement == GOL::BorderManagement::immutableAsIs);
+	mData.fillAlternately(firstCell, mBorderManagement == GOL::BorderManagement::immutableAsIs);
 	mIteration = 0;
 	countLifeStatusCells();
 }
@@ -623,6 +623,5 @@ void GOLTeamH::countLifeStatusCells()
 		}
 		s_ptr++;
 	}
-
 	mData.setAliveCount(aliveCount);
 }

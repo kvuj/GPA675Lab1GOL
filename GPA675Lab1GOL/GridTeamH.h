@@ -42,7 +42,6 @@ public:
 	size_t width() const { return mWidth; }
 	size_t height() const { return mHeight; }
 	size_t size() const { return mHeight * mWidth; }
-	size_t aliveCount() const { return mAliveCount; }
 
 	void resize(size_t width, size_t height, CellType initValue = CellType{});
 
@@ -68,8 +67,17 @@ public:
 	size_t totalAlive() const;
 	float totalAliveRel() const;
 
+	size_t lastGenDead() const;
+	float lastGenDeadRel() const;
+
+	size_t lastGenAlive() const;
+	float lastGenAliveRel() const;
+
+	int tendencyAbs() const;
+	float tendencyRel() const;
+
 	void fill(CellType value, bool fillBorder);
-	void fillAternately(CellType initValue, bool fillBorder);
+	void fillAlternately(CellType initValue, bool fillBorder);
 	void randomize(double percentAlive, bool fillBorder);
 
 	void fillBorder(CellType value);
@@ -80,7 +88,7 @@ public:
 
 private:
 	DataType mData, mIntermediateData;
-	size_t mWidth, mHeight, mAliveCount;
+	size_t mWidth, mHeight, mAliveCount, mLastGenAliveCount;
 
 	// Pour la génération de nombres aléatoires
 	std::random_device mRandomDevice;
