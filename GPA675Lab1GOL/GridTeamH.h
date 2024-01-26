@@ -2,14 +2,13 @@
 #ifndef GRIDTEAMH_H
 #define GRIDTEAMH_H
 
-#include <vector>
 #include <random>
 #include "GOL.h"
 
 // Fichier : GridTeam.h
 // GPA675 – Laboratoire 1 
 // Création :
-// - A. Einstein
+// - Timothée Leclaire-Fournier 
 // - 2024/01/17
 // - - - - - - - - - - - - - - - - - - - - - - -
 // Classe GridTeamH

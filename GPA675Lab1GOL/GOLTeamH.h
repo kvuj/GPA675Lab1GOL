@@ -3,12 +3,12 @@
 #define GOLTEAMH_H
 
 
+#include <iostream>
 #include <string>
 #include <optional>
+
 #include <GOL.h>
 #include "GridTeamH.h"
-#include <iostream>
-#include <vector>
 
 // Fichier : GridTeam.h
 // GPA675 – Laboratoire 1 
@@ -114,6 +114,7 @@ private:
 	std::optional<sizeQueried> parsePattern(std::string const& pattern);
 	void fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 		int centerX, int centerY);
+	void countLifeStatusCells();
 };
 
 #endif GOLTEAMH_H

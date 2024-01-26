@@ -101,6 +101,7 @@ void GOLTeamH::resize(size_t width, size_t height, State defaultState)
 {
 	mData.resize(width, height, defaultState);
 	drawBorder();
+	countLifeStatusCells();
 }
 
 //! \brief Mutateur modifiant la règle de la simulation.
@@ -218,6 +219,7 @@ void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
 	mBorderManagement = borderManagement;
 	mIteration = 0;
 	drawBorder();
+	countLifeStatusCells();
 }
 
 void GOLTeamH::drawBorder()
@@ -251,6 +253,7 @@ void GOLTeamH::setState(int x, int y, State state)
 {
 	mData.setAt(x, y, state);
 	mIteration = 0;
+	countLifeStatusCells();
 }
 
 //! \brief Mutateur remplissant de façon uniforme toutes les cellules de 
@@ -266,6 +269,7 @@ void GOLTeamH::fill(State state)
 {
 	mData.fill(state, mBorderManagement == GOL::BorderManagement::immutableAsIs);
 	mIteration = 0;
+	countLifeStatusCells();
 }
 
 //! \brief Mutateur remplissant de façon alternée toutes les cellules de
@@ -282,6 +286,7 @@ void GOLTeamH::fillAlternately(State firstCell)
 {
 	mData.fillAternately(firstCell, mBorderManagement == GOL::BorderManagement::immutableAsIs);
 	mIteration = 0;
+	countLifeStatusCells();
 }
 
 //! \brief Mutateur remplissant de façon aléatoire toutes les cellules de
@@ -299,6 +304,7 @@ void GOLTeamH::randomize(double percentAlive)
 {
 	mData.randomize(percentAlive, mBorderManagement == GOL::BorderManagement::immutableAsIs);
 	mIteration = 0;
+	countLifeStatusCells();
 }
 
 //! \brief Mutateur remplissant la grille par le patron passé en argument.
@@ -331,6 +337,7 @@ bool GOLTeamH::setFromPattern(std::string const& pattern, int centerX, int cente
 	fillDataFromPattern(pattern, sq.value(), centerX, centerY);
 
 	mIteration = 0;
+	countLifeStatusCells();
 	return true;
 }
 
@@ -358,6 +365,7 @@ bool GOLTeamH::setFromPattern(std::string const& pattern)
 	fillDataFromPattern(pattern, sq.value(), centerX, centerY);
 
 	mIteration = 0;
+	countLifeStatusCells();
 	return true;
 }
 
@@ -602,4 +610,19 @@ void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 			mData.setAt(centerX + x, centerY + y, cellState);
 		}
 	}
+}
+
+void GOLTeamH::countLifeStatusCells()
+{
+	size_t aliveCount{};
+	auto* s_ptr{ mData.data() }, * e_ptr{ mData.data() + mData.size() };
+
+	while (s_ptr < e_ptr) {
+		if (*s_ptr == State::alive) {
+			aliveCount++;
+		}
+		s_ptr++;
+	}
+
+	mData.setAliveCount(aliveCount);
 }
