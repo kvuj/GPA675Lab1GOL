@@ -1,7 +1,7 @@
 ﻿#pragma once
 #ifndef GOLTEAMH_H
 #define GOLTEAMH_H
-	
+
 
 #include <string>
 #include <optional>
@@ -45,17 +45,21 @@ constexpr unsigned char MAX_ALPHA = 255;
 class GOLTeamH : public GOL
 {
 public:
+	struct sizeQueried {
+		size_t width, height, pos;
+	};
+
 	//  - le constructeur par défaut : _class_()
 	//  - le constructeur d'initialisation proposé : _class_(size_t width, size_t height, State defaultState = State::dead)
 	//  - le destructeur : ~_class_()
 	GOLTeamH();
-	GOLTeamH(GOLTeamH const &) = delete;
-	GOLTeamH(GOLTeamH  &&) = delete;
-	GOLTeamH& operator =(GOLTeamH const &) = delete;
+	GOLTeamH(GOLTeamH const&) = delete;
+	GOLTeamH(GOLTeamH&&) = delete;
+	GOLTeamH& operator =(GOLTeamH const&) = delete;
 	GOLTeamH& operator =(GOLTeamH&&) = delete;
 
-	virtual ~GOLTeamH()=default;
-	
+	virtual ~GOLTeamH() = default;
+
 	// inline puisque trivial.
 	size_t width() const override { return mData.width(); }
 	size_t height() const override { return mData.height(); }
@@ -107,6 +111,9 @@ private:
 
 	// Fonctions utilisées à l'interne.
 	std::optional<unsigned char> convertCharToNumber(const char c);
+	std::optional<sizeQueried> parsePattern(std::string const& pattern);
+	void fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
+		int centerX, int centerY);
 };
 
 #endif GOLTEAMH_H

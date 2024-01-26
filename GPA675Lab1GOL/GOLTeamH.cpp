@@ -323,58 +323,15 @@ void GOLTeamH::randomize(double percentAlive)
 // TODO
 bool GOLTeamH::setFromPattern(std::string const& pattern, int centerX, int centerY)
 {
-	// Analyse du pattern
-	size_t pos = 0;
+	auto sq = parsePattern(pattern);
 
-	// Vérification du '[' initial
-	if (pattern[pos++] != '[') {
-		std::cerr << "Erreur de format : '[' manquant." << std::endl;
+	if (!sq.has_value())
 		return false;
-	}
 
-	// Lecture de la largeur
-	size_t width = std::stoi(pattern.substr(pos), &pos);
-	if (width <= 0) {
-		std::cerr << "Erreur de format : Largeur invalide." << std::endl;
-		return false;
-	}
+	fillDataFromPattern(pattern, sq.value(), centerX, centerY);
 
-	// Vérification du 'x'
-	if (pattern[pos++] != 'x') {
-		std::cerr << "Erreur de format : 'x' manquant." << std::endl;
-		return false;
-	}
-
-	// Lecture de la hauteur
-	size_t height = std::stoi(pattern.substr(pos), &pos);
-	if (height <= 0) {
-		std::cerr << "Erreur de format : Hauteur invalide." << std::endl;
-		return false;
-	}
-
-	// Vérification du ']'
-	if (pattern[pos++] != ']') {
-		std::cerr << "Erreur de format : ']' manquant." << std::endl;
-		return false;
-	}
-
-	// Vérification de la taille du reste du pattern
-	if (pattern.length() - pos != width * height) {
-		std::cerr << "Erreur de format : Taille du patron incorrecte." << std::endl;
-		return false;
-	}
-
-	// Remplissage de la grille aux positions spécifiées par le patron
-	for (size_t y = 0; y < height; ++y) {
-		for (size_t x = 0; x < width; ++x) {
-			char cellChar = pattern[pos++];
-			State cellState = (cellChar == '0') ? State::dead : State::alive;
-			mData.setAt(centerX + x, centerY + y, cellState);
-		}
-	}
-
-	return true;
 	mIteration = 0;
+	return true;
 }
 
 //! \brief Mutateur remplissant la grille par le patron passé en argument.
@@ -388,59 +345,20 @@ bool GOLTeamH::setFromPattern(std::string const& pattern, int centerX, int cente
 	//! \param pattern Le patron à appliquer.
 	//! \return true si le patron est valide, false sinon.
 
-// TODO
 bool GOLTeamH::setFromPattern(std::string const& pattern)
 {
-	// Analyse du pattern
-	size_t pos = 0;
+	auto sq = parsePattern(pattern);
 
-	// Vérification du '[' initial
-	if (static_cast<char>(pattern[pos++]) != '[') {
-		std::cerr << "Erreur de format : '[' manquant." << std::endl;
+	if (!sq.has_value())
 		return false;
-	}
 
-	// Lecture de la largeur
-	size_t width = std::stoi(pattern.substr(pos), &pos);
-	if (width <= 0) {
-		std::cerr << "Erreur de format : Largeur invalide." << std::endl;
-		return false;
-	}
-	pos++;
-	if (pattern[pos++] != 120 ) {
-		std::cerr << "Erreur de format : 'x' manquant." << std::endl;
-		return false;
-	}
-	// Lecture de la hauteur
-	size_t height = std::stoi(pattern.substr(pos), &pos);
-	pos = pos + 4;
-	if (height <= 0) {
-		std::cerr << "Erreur de format : Hauteur invalide." << std::endl;
-		return false;
-	}
-	
-	// Vérification du ']'
-	if (static_cast<char>(pattern[pos++]) != ']') {
-		std::cerr << "Erreur de format : ']' manquant." << std::endl;
-		return false;
-	}
-	pos++;
-	
-	size_t centerX = mData.width() / 2 - width/2;
-	size_t centerY = mData.height() / 2 - height/2;
+	size_t centerX = mData.width() / 2 - (sq.value().width / 2);
+	size_t centerY = mData.height() / 2 - (sq.value().height / 2);
 
-	// Remplissage de la grille aux positions spécifiées par le patron
-	for (size_t y = 0; y < height; ++y) {
-		for (size_t x = 0; x < width; ++x) {
-			char cellChar = pattern[pos++];
-			mData.setAt(centerX + x, centerY + y, State::dead);
-			State cellState = (cellChar == '0') ? State::dead : State::alive;
-			mData.setAt(centerX + x, centerY + y, cellState);
-		}
-	}
+	fillDataFromPattern(pattern, sq.value(), centerX, centerY);
 
-	return true;
 	mIteration = 0;
+	return true;
 }
 
 //! \brief Mutateur modifiant la couleur d'un état.
@@ -622,4 +540,66 @@ std::optional<unsigned char> GOLTeamH::convertCharToNumber(const char c)
 		return std::nullopt;
 
 	return (c - 48);
+}
+
+std::optional<GOLTeamH::sizeQueried> GOLTeamH::parsePattern(std::string const& pattern)
+{
+	// Analyse du pattern
+	size_t pos{}, processedNumbers{};
+
+	// Vérification du '[' initial
+	if (pattern[pos++] != '[') {
+		std::cerr << "Erreur de format : '[' manquant." << std::endl;
+		return std::nullopt;
+	}
+
+	// Lecture de la largeur
+	size_t width = std::stoi(pattern.substr(pos), &processedNumbers);
+	pos += processedNumbers;
+
+	if (width <= 0) {
+		std::cerr << "Erreur de format : Largeur invalide." << std::endl;
+		return std::nullopt;
+	}
+
+	// Vérification du 'x'
+	if (pattern[pos++] != 'x') {
+		std::cerr << "Erreur de format : 'x' manquant." << std::endl;
+		return std::nullopt;
+	}
+
+	// Lecture de la hauteur
+	size_t height = std::stoi(pattern.substr(pos), &processedNumbers);
+	pos += processedNumbers;
+
+	if (height <= 0) {
+		std::cerr << "Erreur de format : Hauteur invalide." << std::endl;
+		return std::nullopt;
+	}
+
+	// Vérification du ']'
+	if (pattern[pos++] != ']') {
+		std::cerr << "Erreur de format : ']' manquant." << std::endl;
+		return std::nullopt;
+	}
+
+	// Vérification de la taille du reste du pattern
+	if (pattern.length() - pos != width * height) {
+		std::cerr << "Erreur de format : Taille du patron incorrecte." << std::endl;
+		return std::nullopt;
+	}
+
+	return std::move(GOLTeamH::sizeQueried{ .width = width, .height = height, .pos = pos });
+}
+
+void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
+	int centerX, int centerY)
+{
+	// Remplissage de la grille aux positions spécifiées par le patron
+	for (size_t y = 0; y < sq.height; ++y) {
+		for (size_t x = 0; x < sq.width; ++x) {
+			State cellState = (pattern[sq.pos++] == '0') ? State::dead : State::alive;
+			mData.setAt(centerX + x, centerY + y, cellState);
+		}
+	}
 }
