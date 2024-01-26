@@ -13,32 +13,11 @@
 // Fichier : GridTeam.h
 // GPA675 – Laboratoire 1 
 // Création :
-// - A. Einstein
+// - Timothée Leclaire-Fournier et Martin Euzenat
 // - 2024/01/17
 // - - - - - - - - - - - - - - - - - - - - - - -
 // Classe GOLTeamH
 // - - - - - - - - - - - - - - - - - - - - - - -
-
-
-
-// La classe point représente une grille dans l’espace 2d des réels.
-// La classe possède les attributs width et y.
-// - ces accesseurs :
-
-// - ces mutateurs :
-
-
-// La classe point représente un point dans l’espace 2d des réels.
-// La classe possède les attributs x et y.
-// - ces accesseurs :
-// double x();
-// double y();
-// - ces mutateurs :
-// void setX(double x);
-// void setY(double y);
-// void set(double x, double y);
-
-
 
 constexpr unsigned char MAX_ALPHA = 255;
 
@@ -49,9 +28,6 @@ public:
 		size_t width, height, pos;
 	};
 
-	//  - le constructeur par défaut : _class_()
-	//  - le constructeur d'initialisation proposé : _class_(size_t width, size_t height, State defaultState = State::dead)
-	//  - le destructeur : ~_class_()
 	GOLTeamH();
 	GOLTeamH(GOLTeamH const&) = delete;
 	GOLTeamH(GOLTeamH&&) = delete;

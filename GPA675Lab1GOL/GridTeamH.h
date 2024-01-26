@@ -8,7 +8,7 @@
 // Fichier : GridTeam.h
 // GPA675 – Laboratoire 1 
 // Création :
-// - Timothée Leclaire-Fournier 
+// - Timothée Leclaire-Fournier et Martin Euzenat
 // - 2024/01/17
 // - - - - - - - - - - - - - - - - - - - - - - -
 // Classe GridTeamH
@@ -18,17 +18,7 @@
 
 
 // La classe point représente une grille dans l’espace 2d des réels.
-// La classe possède les attributs width et y.
-// - ces accesseurs :
-// 
-// - ces mutateurs :
-// 
-
-/*
-	Cette classe fonctionne en ayant deux std::vector qui contiennent les statuts
-	des cellules. Un vecteur intermédiaire est échangé avec .swap() avec le vecteur
-	réel lors des calculs.
-*/
+// Deux tableaux sont utilisés, un réel et un intermédiaire.
 
 class GridTeamH
 {
