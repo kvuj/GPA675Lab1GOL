@@ -17,6 +17,9 @@
 // - 2024/01/17
 // - - - - - - - - - - - - - - - - - - - - - - -
 // Classe GOLTeamH
+// 
+// Cette classe nosu permet de créer et de manipuler un jeu de la vie.
+// Elle se base sur l'utilisation de la classe GridTeamH afin de gérer les mouvement dans la grid
 // - - - - - - - - - - - - - - - - - - - - - - -
 
 constexpr unsigned char MAX_ALPHA = 255;

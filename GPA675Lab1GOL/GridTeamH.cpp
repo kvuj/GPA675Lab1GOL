@@ -8,14 +8,14 @@
 
 // Constructeur Grid par défaut
 GridTeamH::GridTeamH()
-	: GridTeamH(100, 100, CellType::dead)
+	: GridTeamH(100, 100, CellType::dead,Classic)
 {
 }
 
-GridTeamH::GridTeamH(size_t width, size_t height, CellType initValue)
+GridTeamH::GridTeamH(size_t width, size_t height, CellType initValue, BorderManagement borderType)
 	:mWidth{ width }, mHeight{ height }, mEngine(mRandomDevice()), mDistribution(0.0, 1.0)
 	, mAliveCount{}, mLastGenAliveCount{}
-	, mData{}, mIntermediateData{}
+	, mData{}, mIntermediateData{}, mBorderType{ Classic }
 {
 	resize(width, height, initValue);
 }
@@ -95,6 +95,7 @@ void GridTeamH::resize(size_t width, size_t height, CellType initValue)
 	fill(initValue, true);
 }
 
+
 void GridTeamH::dealloc()
 {
 	if (mData && mIntermediateData) {
@@ -108,32 +109,75 @@ void GridTeamH::dealloc()
 // Accesseur retournant la valeur d'une cellule à une certaine coordonnée.
 GridTeamH::CellType GridTeamH::value(int column, int row) const
 {
-	return mData[(static_cast<unsigned long long>(row) - 1) * mWidth + (static_cast<unsigned long long>(column) - 1)];
+	if (mBorderType == Warpping) {
+		return mData[(static_cast<unsigned long long>(row) + mHeight) % mHeight * mWidth + (static_cast<unsigned long long>(column) + mWidth) % mWidth];
+
+	}
+	else if (mBorderType == Mirror) {
+
+	}
+	else if (mBorderType == Classic) {
+		return mData[(static_cast<unsigned long long>(row) - 1) * mWidth + (static_cast<unsigned long long>(column) - 1)];
+	}
 }
 
 // Mutateur modifiant la valeur d'une cellule à une certaine coordonnée.
 void GridTeamH::setValue(int column, int row, CellType value)
 {
-	mData[(static_cast<unsigned long long>(row) - 1) * mWidth + (static_cast<unsigned long long>(column) - 1)] = value;
+	if(mBorderType== Warpping){
+		mData[(static_cast<unsigned long long>(row) + mHeight) % mHeight * mWidth + (static_cast<unsigned long long>(column) + mWidth) % mWidth]= value;
+
+	}
+	else if(mBorderType== Mirror){
+
+	}
+	else if(mBorderType== Classic){
+	
+		mData[(static_cast<unsigned long long>(row) - 1) * mWidth + (static_cast<unsigned long long>(column) - 1)] = value;
+	}
+	
 }
 
 // Accesseur retournant la valeur d'une cellule à une certaine coordonnée. 
 std::optional<GridTeamH::CellType> GridTeamH::at(int column, int row) const
 {
-	if (column >= mWidth || row >= mHeight)
-		return std::nullopt;
+	if (mBorderType == Warpping) {
+		// Logique de gestion des bords toroïdaux
+		column = (column + mWidth) % mWidth;
+		row = (row + mHeight) % mHeight;
+	}
+	else if (mBorderType == Mirror) {
 
-	return mData[(row - 1) * mWidth + (column - 1)];
+	}
+	else if (mBorderType == Classic) {
+		if (column >= mWidth || row >= mHeight)
+			return std::nullopt;
+
+		return mData[(row - 1) * mWidth + (column - 1)];
+	}
+	
 }
 
 
 // Mutateur modifiant la valeur d'une cellule à une certaine coordonnée.
 void GridTeamH::setAt(int column, int row, CellType value)
 {
-	if (column > mWidth || row > mHeight)
-		return;
+	if (mBorderType == Warpping) {
+		// Logique de gestion des bords toroïdaux
+		column = (column + mWidth) % mWidth;
+		row = (row + mHeight) % mHeight;
+		mData[(static_cast<unsigned long long>(row) + mHeight) % mHeight * mWidth + (static_cast<unsigned long long>(column) + mWidth) % mWidth] = value;
+	}
+	else if (mBorderType == Mirror) {
 
-	mData[(static_cast<unsigned long long>(row) - 1) * mWidth + (static_cast<unsigned long long>(column) - 1)] = value;
+	}
+	else if (mBorderType == Classic) {
+		if (column > mWidth || row > mHeight)
+			return;
+
+		mData[(static_cast<unsigned long long>(row) - 1) * mWidth + (static_cast<unsigned long long>(column) - 1)] = value;
+
+	}
 }
 
 void GridTeamH::setAliveCount(size_t aliveCount)
@@ -276,6 +320,7 @@ void GridTeamH::fillBorderManipulations(DataType ptr, CellType value) const
 }
 
 // TODO
+
 void GridTeamH::fillBorderWarped()
 {
 
@@ -293,6 +338,7 @@ void GridTeamH::switchToIntermediate()
 	auto* temp{ mData };
 	mData = mIntermediateData;
 	mIntermediateData = temp;
+	
 }
 
 

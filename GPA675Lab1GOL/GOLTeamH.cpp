@@ -232,10 +232,10 @@ void GOLTeamH::drawBorder()
 		mData.fillBorder(GridTeamH::CellType::alive);
 		break;
 	case GOL::BorderManagement::warping:
-		mData.fillBorderWarped();
+		mData.setBorderManagement(GridTeamH::BorderManagement::Warpping);
 		break;
 	case GOL::BorderManagement::mirror:
-		mData.fillBorderMirror();
+		mData.setBorderManagement(GridTeamH::BorderManagement::Mirror);
 		break;
 	}
 }
@@ -478,8 +478,8 @@ void GOLTeamH::processOneStep()
 	ptrGrid = nullptr;
 	ptrGridInt = nullptr;
 
-	mData.switchToIntermediate();
-	mIteration.value()++;
+	mData.switchToIntermediate(); //mise à jour de la grille
+	mIteration.value()++; 
 	mData.setAliveCount(aliveCount);
 }
 

@@ -19,6 +19,7 @@
 
 // La classe point représente une grille dans l’espace 2d des réels.
 // Deux tableaux sont utilisés, un réel et un intermédiaire.
+//Elle comporte des méthodes pour manipuler les cellules de la grille et en sortir des statstiques.
 
 class GridTeamH
 {
@@ -27,9 +28,15 @@ public:
 	using CellType = GOL::State;
 	using DataType = CellType*;
 
+	enum BorderManagement {
+		Warpping,
+		Classic,
+		Mirror,
+	};
+
 	// Définition des constructeurs / destructeur
 	GridTeamH();
-	GridTeamH(size_t width, size_t height, CellType initValue = CellType{});
+	GridTeamH(size_t width, size_t height, CellType initValue = CellType{}, BorderManagement borderType = Classic);
 
 	GridTeamH(GridTeamH const&);
 	GridTeamH(GridTeamH&&) noexcept;
@@ -53,7 +60,7 @@ public:
 	void setAt(int column, int row, CellType value);
 
 	void setAliveCount(size_t aliveCount);
-
+	void setBorderManagement(BorderManagement borderType) { mBorderType = borderType; }
 	// Accesseurs du "buffer" de la grille
 	DataType const& data() const;
 	DataType& data();
@@ -61,6 +68,7 @@ public:
 	DataType const& intData() const;
 	DataType& intData();
 
+	//méthode pour les statistiques
 	size_t totalDead() const;
 	float totalDeadRel() const;
 
@@ -76,25 +84,31 @@ public:
 	int tendencyAbs() const;
 	float tendencyRel() const;
 
+	//Méthode de remplissage
 	void fill(CellType value, bool fillBorder);
 	void fillAlternately(CellType initValue, bool fillBorder);
 	void randomize(double percentAlive, bool fillBorder);
 
+	//Méthode de gestion de bordure
 	void fillBorder(CellType value);
 	void fillBorderWarped();
 	void fillBorderMirror();
 
+	//Alternance entre les deux grilles
 	void switchToIntermediate();
 
 private:
 	DataType mData, mIntermediateData;
 	size_t mWidth, mHeight, mAliveCount, mLastGenAliveCount;
 
+	BorderManagement mBorderType;
+
 	// Pour la génération de nombres aléatoires
 	std::random_device mRandomDevice;
 	std::mt19937 mEngine;
 	std::uniform_real_distribution<> mDistribution;
 
+	// Méthodes utilisées en interne
 	void fillBorderManipulations(DataType ptr, CellType value) const;
 	void dealloc();
 };
