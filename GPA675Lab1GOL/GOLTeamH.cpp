@@ -262,6 +262,8 @@ void GOLTeamH::setState(int x, int y, State state)
 void GOLTeamH::fill(State state)
 {
 	mData.fill(state, mBorderManagement == GOL::BorderManagement::immutableAsIs);
+	modifyBorderIfNecessary(reinterpret_cast<uint8_t*>(mData.data()),
+		reinterpret_cast<uint8_t*>(mData.intData()));
 	mIteration = 0;
 	countLifeStatusCells();
 }
@@ -279,6 +281,8 @@ void GOLTeamH::fill(State state)
 void GOLTeamH::fillAlternately(State firstCell)
 {
 	mData.fillAlternately(firstCell, mBorderManagement == GOL::BorderManagement::immutableAsIs);
+	modifyBorderIfNecessary(reinterpret_cast<uint8_t*>(mData.data()),
+		reinterpret_cast<uint8_t*>(mData.intData()));
 	mIteration = 0;
 	countLifeStatusCells();
 }
@@ -297,6 +301,8 @@ void GOLTeamH::fillAlternately(State firstCell)
 void GOLTeamH::randomize(double percentAlive)
 {
 	mData.randomize(percentAlive, mBorderManagement == GOL::BorderManagement::immutableAsIs);
+	modifyBorderIfNecessary(reinterpret_cast<uint8_t *>(mData.data()), 
+		reinterpret_cast<uint8_t*>(mData.intData()));
 	mIteration = 0;
 	countLifeStatusCells();
 }
