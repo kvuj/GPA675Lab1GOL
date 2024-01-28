@@ -100,7 +100,7 @@ GOL::ImplementationInformation GOLTeamH::information() const
 void GOLTeamH::resize(size_t width, size_t height, State defaultState)
 {
 	mData.resize(width, height, defaultState);
-	drawBorder();
+	setBorder();
 	countLifeStatusCells();
 }
 
@@ -218,11 +218,11 @@ void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
 {
 	mBorderManagement = borderManagement;
 	mIteration = 0;
-	drawBorder();
+	setBorder();
 	countLifeStatusCells();
 }
 
-void GOLTeamH::drawBorder()
+void GOLTeamH::setBorder()
 {
 	switch (mBorderManagement.value_or(GOL::BorderManagement::foreverDead)) {
 	case GOL::BorderManagement::foreverDead:
@@ -230,12 +230,6 @@ void GOLTeamH::drawBorder()
 		break;
 	case GOL::BorderManagement::foreverAlive:
 		mData.fillBorder(GridTeamH::CellType::alive);
-		break;
-	case GOL::BorderManagement::warping:
-		mData.setBorderManagement(GridTeamH::BorderManagement::Warpping);
-		break;
-	case GOL::BorderManagement::mirror:
-		mData.setBorderManagement(GridTeamH::BorderManagement::Mirror);
 		break;
 	}
 }
@@ -431,7 +425,6 @@ void GOLTeamH::processOneStep()
 
 	for (size_t j{ 1 }; j < heightNoBorder + 1; ++j) {
 		for (size_t i{ 1 }; i < widthNoBorder + 1; ++i) {
-
 			neighborsAliveCount = 0;
 
 			// Top
@@ -475,11 +468,13 @@ void GOLTeamH::processOneStep()
 		ptrGrid += 2;
 		ptrGridInt += 2;
 	}
+
 	ptrGrid = nullptr;
 	ptrGridInt = nullptr;
 
-	mData.switchToIntermediate(); //mise à jour de la grille
-	mIteration.value()++; 
+	modifyBorderIfNecessary(reinterpret_cast<uint8_t*>(mData.data()), reinterpret_cast<uint8_t*>(mData.intData()));
+	mData.switchToIntermediate(); // Mise à jour de la grille
+	mIteration.value()++;
 	mData.setAliveCount(aliveCount);
 }
 
@@ -624,4 +619,102 @@ void GOLTeamH::countLifeStatusCells()
 		s_ptr++;
 	}
 	mData.setAliveCount(aliveCount);
+}
+
+void GOLTeamH::modifyBorderIfNecessary(uint8_t* ptrGrid, uint8_t* ptrGridInt)
+{
+	auto bm = mBorderManagement.value_or(BorderManagement::immutableAsIs);
+	auto width{ mData.width() }, height{ mData.height() };	// Pour éviter des appels de fonctions trop souvent.
+	auto rule{ mParsedRule };								// Pour la capture du lambda.
+
+	if (mBorderManagement.value() == GOL::BorderManagement::immutableAsIs ||
+		bm == GOL::BorderManagement::foreverAlive ||
+		bm == GOL::BorderManagement::foreverDead)
+		return;
+
+	auto* e_ptr = ptrGrid + (width - 1);
+
+	// Lambda pour une opération courante.
+	auto op = [rule](size_t count, uint8_t* ptrGrid) {
+		return static_cast<bool>((rule >> *(ptrGrid) * 16) & (1u << count));
+		};
+
+	// TOP
+	while (ptrGrid < e_ptr) {
+		*ptrGridInt = op(countNeighbors(ptrGrid, bm), ptrGrid);
+
+		ptrGrid++;
+		ptrGridInt++;
+	}
+
+	// DROITE
+	e_ptr += width * (height - 1);
+	while (ptrGrid < e_ptr) {
+		*ptrGridInt = op(countNeighbors(ptrGrid, bm), ptrGrid);
+
+		ptrGrid += width;
+		ptrGridInt += width;
+	}
+
+	// DESSOUS
+	e_ptr -= (width - 1);
+	while (ptrGrid > e_ptr) {
+		*ptrGridInt = op(countNeighbors(ptrGrid, bm), ptrGrid);
+
+		ptrGrid--;
+		ptrGridInt--;
+	}
+
+	// GAUCHE
+	e_ptr -= width * (height - 1);
+	while (ptrGrid > e_ptr) {
+		*ptrGridInt = op(countNeighbors(ptrGrid, bm), ptrGrid);
+
+		ptrGrid -= width;
+		ptrGridInt -= width;
+	}
+}
+
+size_t GOLTeamH::countNeighbors(uint8_t* ptrGrid, BorderManagement bm) const
+{
+	auto width{ mData.width() }, height{ mData.height() };	// Pour éviter des appels de fonctions trop souvent.
+	size_t neighborsAliveCount{};
+	auto* tempPtr{ ptrGrid - (width + 1) };
+
+	// Petit lambda pour simplifier les opérations.
+	auto putInBounds = [ptrGrid, width, height, bm](uint8_t* ptr, uint8_t const* cellPtr) {
+		if (ptr < ptrGrid)
+			ptr += width * (bm == GOL::BorderManagement::mirror) ? 2 : height;
+		else if (ptr > ptrGrid + (width * height))
+			ptr -= width * (bm == GOL::BorderManagement::mirror) ? 2 : height;
+
+		if ((cellPtr - ptrGrid) % width == 0)
+			ptr += (bm == GOL::BorderManagement::mirror) ? 2 : width;
+		else if ((cellPtr - ptrGrid) % width == width - 1)
+			ptr -= (bm == GOL::BorderManagement::mirror) ? 2 : width;
+		return ptr;
+		};
+
+	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
+	tempPtr++;
+	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
+	tempPtr++;
+	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
+
+	// Milieu
+	tempPtr += (width - 2);
+	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
+	tempPtr += 2;
+	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
+
+
+	// Dessous
+	tempPtr += (width - 2);
+	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
+	tempPtr++;
+	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
+	tempPtr++;
+	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
+
+	return neighborsAliveCount;
 }

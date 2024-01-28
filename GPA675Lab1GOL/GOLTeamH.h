@@ -18,7 +18,7 @@
 // - - - - - - - - - - - - - - - - - - - - - - -
 // Classe GOLTeamH
 // 
-// Cette classe nosu permet de créer et de manipuler un jeu de la vie.
+// Cette classe nous permet de créer et de manipuler un jeu de la vie.
 // Elle se base sur l'utilisation de la classe GridTeamH afin de gérer les mouvement dans la grid
 // - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -54,7 +54,7 @@ public:
 	void resize(size_t width, size_t height, State defaultState) override;
 	bool setRule(std::string const& rule) override;
 	void setBorderManagement(BorderManagement borderManagement) override;
-	void drawBorder();
+	void setBorder();
 	void setState(int x, int y, State state) override;
 	void fill(State state) override;
 	void fillAlternately(State firstCell) override;
@@ -94,6 +94,10 @@ private:
 	void fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 		int centerX, int centerY);
 	void countLifeStatusCells();
+
+	// Fonction qui modifie le border selon la règle
+	void modifyBorderIfNecessary(uint8_t* ptrGrid, uint8_t* ptrGridInt);
+	size_t countNeighbors(uint8_t* ptrGrid, BorderManagement bm) const;
 };
 
 #endif GOLTEAMH_H
