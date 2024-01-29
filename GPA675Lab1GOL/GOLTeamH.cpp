@@ -362,7 +362,7 @@ bool GOLTeamH::setFromPattern(std::string const& pattern)
 	size_t centerX = mData.width() / 2 - (sq.value().width / 2);
 	size_t centerY = mData.height() / 2 - (sq.value().height / 2);
 
-	fillDataFromPattern(pattern, sq.value(), centerX, centerY);
+	fillDataFromPattern(pattern, sq.value(), centerX + 1, centerY + 1);
 
 	mIteration = 0;
 	countLifeStatusCells();
@@ -422,7 +422,8 @@ void GOLTeamH::processOneStep()
 
 	size_t neighborsAliveCount{}, aliveCount{};
 
-	// On commence à la première case qui n'est pas dans le border
+	// On commence à la première case qui n'est pas dans le border pour sauver une opération
+	// par cycle.
 	// Pointeur du tableau intermédiaire.
 	auto* ptrGridInt{ reinterpret_cast<uint8_t*>(mData.intData()) + (offset + 1) };
 
@@ -607,6 +608,7 @@ void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 	// Remplissage de la grille aux positions spécifiées par le patron
 	for (size_t y = 0; y < sq.height; ++y) {
 		for (size_t x = 0; x < sq.width; ++x) {
+			// TODO: Check si in bounds et vérifie que ça répare le problème de quand on ferme, erreur.
 			State cellState = (pattern[sq.pos++] == '0') ? State::dead : State::alive;
 			mData.setAt(centerX + x, centerY + y, cellState);
 		}
@@ -627,6 +629,8 @@ void GOLTeamH::countLifeStatusCells()
 	mData.setAliveCount(aliveCount);
 }
 
+
+// TODO: combiner avec fillBorder
 void GOLTeamH::modifyBorderIfNecessary(uint8_t* ptrGrid, uint8_t* ptrGridInt)
 {
 	auto bm = mBorderManagement.value_or(BorderManagement::immutableAsIs);
@@ -641,13 +645,13 @@ void GOLTeamH::modifyBorderIfNecessary(uint8_t* ptrGrid, uint8_t* ptrGridInt)
 	auto* e_ptr = ptrGrid + (width - 1);
 
 	// Lambda pour une opération courante.
-	auto op = [rule](size_t count, uint8_t* ptrGrid) {
+	auto getFutureStatus = [rule](size_t count, uint8_t* ptrGrid) {
 		return static_cast<bool>((rule >> *(ptrGrid) * 16) & (1u << count));
 		};
 
 	// TOP
 	while (ptrGrid < e_ptr) {
-		*ptrGridInt = op(countNeighbors(ptrGrid, bm), ptrGrid);
+		*ptrGridInt = getFutureStatus(countNeighbors(ptrGrid, bm), ptrGrid);
 
 		ptrGrid++;
 		ptrGridInt++;
@@ -656,7 +660,7 @@ void GOLTeamH::modifyBorderIfNecessary(uint8_t* ptrGrid, uint8_t* ptrGridInt)
 	// DROITE
 	e_ptr += width * (height - 1);
 	while (ptrGrid < e_ptr) {
-		*ptrGridInt = op(countNeighbors(ptrGrid, bm), ptrGrid);
+		*ptrGridInt = getFutureStatus(countNeighbors(ptrGrid, bm), ptrGrid);
 
 		ptrGrid += width;
 		ptrGridInt += width;
@@ -665,7 +669,7 @@ void GOLTeamH::modifyBorderIfNecessary(uint8_t* ptrGrid, uint8_t* ptrGridInt)
 	// DESSOUS
 	e_ptr -= (width - 1);
 	while (ptrGrid > e_ptr) {
-		*ptrGridInt = op(countNeighbors(ptrGrid, bm), ptrGrid);
+		*ptrGridInt = getFutureStatus(countNeighbors(ptrGrid, bm), ptrGrid);
 
 		ptrGrid--;
 		ptrGridInt--;
@@ -674,7 +678,7 @@ void GOLTeamH::modifyBorderIfNecessary(uint8_t* ptrGrid, uint8_t* ptrGridInt)
 	// GAUCHE
 	e_ptr -= width * (height - 1);
 	while (ptrGrid > e_ptr) {
-		*ptrGridInt = op(countNeighbors(ptrGrid, bm), ptrGrid);
+		*ptrGridInt = getFutureStatus(countNeighbors(ptrGrid, bm), ptrGrid);
 
 		ptrGrid -= width;
 		ptrGridInt -= width;
@@ -690,14 +694,14 @@ size_t GOLTeamH::countNeighbors(uint8_t* ptrGrid, BorderManagement bm) const
 	// Petit lambda pour simplifier les opérations.
 	auto putInBounds = [ptrGrid, width, height, bm](uint8_t* ptr, uint8_t const* cellPtr) {
 		if (ptr < ptrGrid)
-			ptr += width * (bm == GOL::BorderManagement::mirror) ? 2 : height;
+			ptr += width * (bm == GOL::BorderManagement::mirror) ? 2 : (height - 1);
 		else if (ptr > ptrGrid + (width * height))
-			ptr -= width * (bm == GOL::BorderManagement::mirror) ? 2 : height;
+			ptr -= width * (bm == GOL::BorderManagement::mirror) ? 2 : (height - 1);
 
 		if ((cellPtr - ptrGrid) % width == 0)
-			ptr += (bm == GOL::BorderManagement::mirror) ? 2 : width;
+			ptr += (bm == GOL::BorderManagement::mirror) ? 2 : (width - 1);
 		else if ((cellPtr - ptrGrid) % width == width - 1)
-			ptr -= (bm == GOL::BorderManagement::mirror) ? 2 : width;
+			ptr -= (bm == GOL::BorderManagement::mirror) ? 2 : (width - 1);
 		return ptr;
 		};
 
@@ -707,14 +711,12 @@ size_t GOLTeamH::countNeighbors(uint8_t* ptrGrid, BorderManagement bm) const
 	tempPtr++;
 	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
 
-	// Milieu
 	tempPtr += (width - 2);
 	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
 	tempPtr += 2;
 	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
 
 
-	// Dessous
 	tempPtr += (width - 2);
 	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
 	tempPtr++;
