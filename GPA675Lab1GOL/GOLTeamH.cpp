@@ -326,7 +326,6 @@ void GOLTeamH::randomize(double percentAlive)
 	//! \return true si le patron est valide, false sinon.
 	//!
 
-// TODO
 bool GOLTeamH::setFromPattern(std::string const& pattern, int centerX, int centerY)
 {
 	auto sq = parsePattern(pattern);
@@ -556,6 +555,8 @@ std::optional<GOLTeamH::sizeQueried> GOLTeamH::parsePattern(std::string const& p
 {
 	// Analyse du pattern
 	size_t pos{}, processedNumbers{};
+	if (pattern.size() < 6)
+		return std::nullopt;
 
 	// Vérification du '[' initial
 	if (pattern[pos++] != '[') {

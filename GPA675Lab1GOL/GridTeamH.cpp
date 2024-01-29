@@ -59,11 +59,11 @@ GridTeamH& GridTeamH::operator=(GridTeamH&& mv) noexcept
 	if (this != &mv) {
 		dealloc();
 
-		mAliveCount = std::move(mv.mAliveCount);
-		mWidth = std::move(mv.mWidth);
-		mHeight = std::move(mv.mHeight);
-		mData = std::move(mv.mData);
-		mIntermediateData = std::move(mv.mIntermediateData);
+		mAliveCount = mv.mAliveCount;
+		mWidth = mv.mWidth;
+		mHeight = mv.mHeight;
+		mData = mv.mData;
+		mIntermediateData = mv.mIntermediateData;
 
 		// Il faut que le destructeur de l'ancien objet soit valide.
 		mv.mData = nullptr;
