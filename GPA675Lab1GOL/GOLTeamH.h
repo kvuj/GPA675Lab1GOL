@@ -4,6 +4,7 @@
 
 
 #include <iostream>
+#include <regex>
 #include <string>
 #include <optional>
 
@@ -28,7 +29,8 @@ class GOLTeamH : public GOL
 {
 public:
 	struct sizeQueried {
-		size_t width, height, pos;
+		size_t width, height;
+		std::string pos;
 	};
 
 	GOLTeamH();
@@ -89,7 +91,7 @@ private:
 	uint64_t mColorEncoded;
 
 	// Fonctions utilisées à l'interne.
-	std::optional<unsigned char> convertCharToNumber(const char c);
+	unsigned char convertCharToNumber(const char c);
 	std::optional<sizeQueried> parsePattern(std::string const& pattern);
 	void fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 		int centerX, int centerY);

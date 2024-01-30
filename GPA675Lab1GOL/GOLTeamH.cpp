@@ -34,7 +34,7 @@ GOLTeamH::GOLTeamH()
 	//! \return Une structure contenant les informations sur la simulation.
 GOL::Statistics GOLTeamH::statistics() const
 {
-	return std::move(GOL::Statistics{
+	return GOL::Statistics{
 		.rule = mRule,
 		.borderManagement = mBorderManagement,
 		.width = width(),
@@ -47,7 +47,7 @@ GOL::Statistics GOLTeamH::statistics() const
 		.totalAliveRel = mData.totalAliveRel(),
 		.tendencyAbs = mData.tendencyAbs(),
 		.tendencyRel = mData.tendencyRel()
-		});
+	};
 }
 
 //! \brief Accesseurs retournant les informations sur la réalisation 
@@ -70,14 +70,14 @@ GOL::Statistics GOLTeamH::statistics() const
 	//! 
 GOL::ImplementationInformation GOLTeamH::information() const
 {
-	return std::move(ImplementationInformation{
+	return ImplementationInformation{
 		.title{"Laboratoire 1"},
 		.authors{{"Timothée Leclaire-Fournier timothee.leclaire-fournier.1@ens.etsmtl.ca"},
 				 {"Martin Euzenat martin.euzenat.1@ens.etsmtl.ca"}},
 		.answers{},
 		.optionnalComments{}
 		// Réponses aux questions...
-		});
+	};
 }
 
 
@@ -110,7 +110,7 @@ void GOLTeamH::resize(size_t width, size_t height, State defaultState)
 	//! et assigne la nouvelle règle pour que les prochaines évolutions 
 	//! l'utilisent. 
 	//! 
-	//! Si la règle est valide, on assigne la novuelle règle, l'ancienne règle 
+	//! Si la règle est valide, on assigne la nouvelle règle, l'ancienne règle 
 	//! est perdue et l'itération courante est remise à 0. Si la règle est 
 	//! invalide, on ne fait rien.
 	//! 
@@ -145,43 +145,20 @@ void GOLTeamH::resize(size_t width, size_t height, State defaultState)
 
 bool GOLTeamH::setRule(std::string const& rule)
 {
-	mRule = rule;
-	bool firstPart{ true };
-	uint32_t parsedRule{};
+	mParsedRule = 0;
+	std::regex regexp(R"(B(\d+)/S(\d+))");
+	std::smatch m;
 
-	// On vérifie que la chaine de charactères contient un B au début.
-	// 5 = taille minimale
-	if (rule.size() < 3 || !(rule[0] == 'B' || rule[0] == 'b'))
-		return false;
+	if (std::regex_search(rule, m, regexp)) {
+		for (auto& i : m[1].str())
+			mParsedRule |= 1u << convertCharToNumber(i);
+		
+		for (auto& i : m[2].str())
+			mParsedRule |= 1u << (convertCharToNumber(i) + 16);
 
-	for (size_t i{ 1 }; i < rule.length(); i++) {
-		// On utilise std::optional comme levier pour vérifier si un char est un nombre.
-		auto opt = convertCharToNumber(rule[i]);
-
-		// Si c'est un chiffre, on continue en enregistrant la valeur.
-		if (opt.has_value()) {
-			if (firstPart)
-				parsedRule |= 1u << opt.value();
-			else
-				parsedRule |= 1u << (opt.value() + 16);
-
-			continue;
-		}
-
-		// S'il n'y a pas de chiffre, on vérifie qu'il y ait 
-		// un backslash avec un S après.
-		if (firstPart && rule[i] == '/' && rule.size() > i + 1
-			&& (rule[i + 1] == 'S' || rule[i + 1] == 's')) {
-			i++;				// On saute le S
-			firstPart = false;	// Deuxième partie
-			continue;
-		}
-		else // Aucun slash + s, alors pas bon.
-			return false;
+		return true;
 	}
-
-	mParsedRule |= parsedRule;
-	return true;
+	return false;
 }
 
 //! \brief Mutateur modifiant la stratégie de gestion de bord.
@@ -301,7 +278,7 @@ void GOLTeamH::fillAlternately(State firstCell)
 void GOLTeamH::randomize(double percentAlive)
 {
 	mData.randomize(percentAlive, mBorderManagement == GOL::BorderManagement::immutableAsIs);
-	modifyBorderIfNecessary(reinterpret_cast<uint8_t *>(mData.data()), 
+	modifyBorderIfNecessary(reinterpret_cast<uint8_t*>(mData.data()),
 		reinterpret_cast<uint8_t*>(mData.intData()));
 	mIteration = 0;
 	countLifeStatusCells();
@@ -543,64 +520,22 @@ void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 	ptrGrid = nullptr;
 }
 
-std::optional<unsigned char> GOLTeamH::convertCharToNumber(const char c)
+unsigned char GOLTeamH::convertCharToNumber(const char c)
 {
-	if (c < 48 || c > 57)
-		return std::nullopt;
-
 	return (c - 48);
 }
 
 std::optional<GOLTeamH::sizeQueried> GOLTeamH::parsePattern(std::string const& pattern)
 {
-	// Analyse du pattern
-	size_t pos{}, processedNumbers{};
-	if (pattern.size() < 6)
+	// \[ -> on match le caractère [
+	// (\d+) -> on match plusieurs caractères de 0-9
+	std::regex regexp(R"(\[(\d+)x(\d+)\](\d+))");
+	std::smatch m;
+
+	if (std::regex_search(pattern, m, regexp))
+		return GOLTeamH::sizeQueried{ .width = std::stoull(m[1]), .height = std::stoull(m[2]), .pos = m[3] };
+	else
 		return std::nullopt;
-
-	// Vérification du '[' initial
-	if (pattern[pos++] != '[') {
-		std::cerr << "Erreur de format : '[' manquant." << std::endl;
-		return std::nullopt;
-	}
-
-	// Lecture de la largeur
-	size_t width = std::stoi(pattern.substr(pos), &processedNumbers);
-	pos += processedNumbers;
-
-	if (width <= 0) {
-		std::cerr << "Erreur de format : Largeur invalide." << std::endl;
-		return std::nullopt;
-	}
-
-	// Vérification du 'x'
-	if (pattern[pos++] != 'x') {
-		std::cerr << "Erreur de format : 'x' manquant." << std::endl;
-		return std::nullopt;
-	}
-
-	// Lecture de la hauteur
-	size_t height = std::stoi(pattern.substr(pos), &processedNumbers);
-	pos += processedNumbers;
-
-	if (height <= 0) {
-		std::cerr << "Erreur de format : Hauteur invalide." << std::endl;
-		return std::nullopt;
-	}
-
-	// Vérification du ']'
-	if (pattern[pos++] != ']') {
-		std::cerr << "Erreur de format : ']' manquant." << std::endl;
-		return std::nullopt;
-	}
-
-	// Vérification de la taille du reste du pattern
-	if (pattern.length() - pos != width * height) {
-		std::cerr << "Erreur de format : Taille du patron incorrecte." << std::endl;
-		return std::nullopt;
-	}
-
-	return std::move(GOLTeamH::sizeQueried{ .width = width, .height = height, .pos = pos });
 }
 
 void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
@@ -610,7 +545,7 @@ void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 	for (size_t y = 0; y < sq.height; ++y) {
 		for (size_t x = 0; x < sq.width; ++x) {
 			// TODO: Check si in bounds et vérifie que ça répare le problème de quand on ferme, erreur.
-			State cellState = (pattern[sq.pos++] == '0') ? State::dead : State::alive;
+			State cellState = (sq.pos[(y * sq.width) + x] == '0') ? State::dead : State::alive;
 			mData.setAt(centerX + x, centerY + y, cellState);
 		}
 	}
