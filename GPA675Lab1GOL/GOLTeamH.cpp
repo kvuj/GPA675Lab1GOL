@@ -72,11 +72,25 @@ GOL::ImplementationInformation GOLTeamH::information() const
 {
 	return ImplementationInformation{
 		.title{"Laboratoire 1"},
-		.authors{{"Timothée Leclaire-Fournier timothee.leclaire-fournier.1@ens.etsmtl.ca"},
-				 {"Martin Euzenat martin.euzenat.1@ens.etsmtl.ca"}},
-		.answers{},
-		.optionnalComments{}
-		// Réponses aux questions...
+		.authors{{{"Leclaire-Fournier"}, {"Timothée"}, {"timothee.leclaire-fournier.1@ens.etsmtl.ca"}},
+		{{"Euzenat"}, {"Martin"}, {"martin.euzenat.1@ens.etsmtl.ca"}}},
+		.answers{{"Nous avons rendu la classe GridTeamH complètement transparente pour la gestion de la \
+grid. Lors d'un redimensionnement, nous supprimons la mémoire et réallouont la mémoire pour le tableau \
+selon la taille nécessaire."},
+		{"Nous parcourons simplement en mémoire les deux tableaux (réel et intermédiaire) et faisons \
+9 accès du tableau réel en mettant à jour la case de l'intermédiaire. Nous utilisons une règle encodée \
+avec ses bits. Ce nombre contient les règles de réanimation et de survie. Voir le fichier GOLTeamH.h pour \
+plus de détails."},
+		{"Pour mettre à jour l'image, nous parcourons le tableau réel au complet et nous utilisons une règle \
+de couleur encodée pour éviter une branche. Nous mettons les bits à 0, mettons le alpha à 255 et utilisons la \
+règle."},
+		{"Nous avons encodé la règle dans un uint32_t en le divisant par deux. Le premier 16 bits (à gauche) \
+est celui de la règle de survie alors qu'à droite nous avons la règle de réanimation. En utilisant une multiplication \
+de 16, nous pouvons accéder à la bonne partie des bits avec aucune branche. Par la suite chaque bit (0-9) représente \
+la partie de la règle."
+		}},
+		.optionnalComments{"Il y a quelques différences dans les implémentations (ex: 3 -> quand on met un \
+pattern, la grid se remet à zéro alors que pas dans la 2 et 1.) Il serait bien d'avoir des précisions."}
 	};
 }
 
@@ -152,7 +166,7 @@ bool GOLTeamH::setRule(std::string const& rule)
 	if (std::regex_search(rule, m, regexp)) {
 		for (auto& i : m[1].str())
 			mParsedRule |= 1u << convertCharToNumber(i);
-		
+
 		for (auto& i : m[2].str())
 			mParsedRule |= 1u << (convertCharToNumber(i) + 16);
 
@@ -311,6 +325,7 @@ bool GOLTeamH::setFromPattern(std::string const& pattern, int centerX, int cente
 		return false;
 
 	fillDataFromPattern(pattern, sq.value(), centerX, centerY);
+	mData.fill(State::dead, true);
 
 	mIteration = 0;
 	countLifeStatusCells();
@@ -339,6 +354,7 @@ bool GOLTeamH::setFromPattern(std::string const& pattern)
 	size_t centerY = mData.height() / 2 - (sq.value().height / 2);
 
 	fillDataFromPattern(pattern, sq.value(), centerX + 1, centerY + 1);
+	mData.fill(State::dead, true);
 
 	mIteration = 0;
 	countLifeStatusCells();
@@ -545,13 +561,13 @@ void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 	for (size_t y = 0; y < sq.height; ++y) {
 		for (size_t x = 0; x < sq.width; ++x) {
 			// TODO: Check si in bounds et vérifie que ça répare le problème de quand on ferme, erreur.
-			if (centerX - sq.width/2 + x <0 
-				|| centerX - sq.width / 2 + x > mData.width() 
-				|| centerY - sq.height / 2 + x <0 
+			if (centerX - sq.width / 2 + x <0
+				|| centerX - sq.width / 2 + x > mData.width()
+				|| centerY - sq.height / 2 + x <0
 				|| centerY - sq.height / 2 + x > mData.height()) {
 				continue;
 			}
-			
+
 			State cellState = (sq.pos[(y * sq.width) + x] == '0') ? State::dead : State::alive;
 			mData.setAt(centerX + x, centerY + y, cellState);
 		}
