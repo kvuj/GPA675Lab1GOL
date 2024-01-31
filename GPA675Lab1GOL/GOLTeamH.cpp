@@ -146,7 +146,7 @@ void GOLTeamH::resize(size_t width, size_t height, State defaultState)
 bool GOLTeamH::setRule(std::string const& rule)
 {
 	mParsedRule = 0;
-	std::regex regexp(R"(B(\d+)/S(\d+))");
+	std::regex regexp(R"(B(\d+)/S(\d+))", std::regex_constants::icase);
 	std::smatch m;
 
 	if (std::regex_search(rule, m, regexp)) {
@@ -529,7 +529,7 @@ std::optional<GOLTeamH::sizeQueried> GOLTeamH::parsePattern(std::string const& p
 {
 	// \[ -> on match le caractère [
 	// (\d+) -> on match plusieurs caractères de 0-9
-	std::regex regexp(R"(\[(\d+)x(\d+)\](\d+))");
+	std::regex regexp(R"(\[(\d+)x(\d+)\](\d+))", std::regex_constants::icase);
 	std::smatch m;
 
 	if (std::regex_search(pattern, m, regexp))
