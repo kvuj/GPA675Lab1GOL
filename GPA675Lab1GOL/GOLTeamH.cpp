@@ -545,6 +545,13 @@ void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 	for (size_t y = 0; y < sq.height; ++y) {
 		for (size_t x = 0; x < sq.width; ++x) {
 			// TODO: Check si in bounds et vérifie que ça répare le problème de quand on ferme, erreur.
+			if (centerX - sq.width/2 + x <0 
+				|| centerX - sq.width / 2 + x > mData.width() 
+				|| centerY - sq.height / 2 + x <0 
+				|| centerY - sq.height / 2 + x > mData.height()) {
+				continue;
+			}
+			
 			State cellState = (sq.pos[(y * sq.width) + x] == '0') ? State::dead : State::alive;
 			mData.setAt(centerX + x, centerY + y, cellState);
 		}
