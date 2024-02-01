@@ -564,13 +564,22 @@ void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 			// Coordonnées dans la grille de destination
 			int destX = centerX + x;
 			int destY = centerY + y;
-
+			/*if (centerX - sq.width / 2 + x <0
+				|| centerX - sq.width / 2 + x > mData.width()
+				|| centerY - sq.height / 2 + x <0
+				|| centerY - sq.height / 2 + x > mData.height()) {
+				continue;
+			}*/
 			// Vérifier si les coordonnées sont dans la grille
 			if (destX >= 0 || destX < mData.width()-1 || destY >= 0 || destY < mData.height()-1) {
 				// On remplit la grille avec les valeurs du pattern
 				State cellState = (sq.pos[(y * sq.width) + x] == '0') ? State::dead : State::alive;
 				mData.setAt(destX, destY, cellState);
 			}
+			else {
+				continue;
+			}
+			
 		}
 	}
 }
