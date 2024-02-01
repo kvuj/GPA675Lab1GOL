@@ -324,8 +324,7 @@ bool GOLTeamH::setFromPattern(std::string const& pattern, int centerX, int cente
 	if (!sq.has_value())
 		return false;
 
-	fillDataFromPattern(pattern, sq.value(), centerX, centerY);
-	mData.fill(State::dead, true);
+	fillDataFromPattern(pattern, sq.value(), centerX+1, centerY+1);
 
 	mIteration = 0;
 	countLifeStatusCells();
@@ -350,11 +349,12 @@ bool GOLTeamH::setFromPattern(std::string const& pattern)
 	if (!sq.has_value())
 		return false;
 
-	size_t centerX = mData.width() / 2 - (sq.value().width / 2);
-	size_t centerY = mData.height() / 2 - (sq.value().height / 2);
-
-	fillDataFromPattern(pattern, sq.value(), centerX + 1, centerY + 1);
-	mData.fill(State::dead, true);
+	// Offset pour ajuster le centrage du pattern
+	int centerX = (mData.width() - sq.value().width)/2;
+	int centerY = (mData.height() - sq.value().height)/2;
+	
+	fillDataFromPattern(pattern, sq.value(),centerX+1, centerY+1);
+	
 
 	mIteration = 0;
 	countLifeStatusCells();
@@ -557,19 +557,20 @@ std::optional<GOLTeamH::sizeQueried> GOLTeamH::parsePattern(std::string const& p
 void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 	int centerX, int centerY)
 {
+	mData.fill(State::dead, true);
 	// Remplissage de la grille aux positions spécifiées par le patron
 	for (size_t y = 0; y < sq.height; ++y) {
 		for (size_t x = 0; x < sq.width; ++x) {
-			// TODO: Check si in bounds et vérifie que ça répare le problème de quand on ferme, erreur.
-			if (centerX - sq.width / 2 + x <0
-				|| centerX - sq.width / 2 + x > mData.width()
-				|| centerY - sq.height / 2 + x <0
-				|| centerY - sq.height / 2 + x > mData.height()) {
-				continue;
-			}
+			// Coordonnées dans la grille de destination
+			int destX = centerX + x;
+			int destY = centerY + y;
 
-			State cellState = (sq.pos[(y * sq.width) + x] == '0') ? State::dead : State::alive;
-			mData.setAt(centerX + x, centerY + y, cellState);
+			// Vérifier si les coordonnées sont dans la grille
+			if (destX >= 0 || destX < mData.width()-1 || destY >= 0 || destY < mData.height()-1) {
+				// On remplit la grille avec les valeurs du pattern
+				State cellState = (sq.pos[(y * sq.width) + x] == '0') ? State::dead : State::alive;
+				mData.setAt(destX, destY, cellState);
+			}
 		}
 	}
 }

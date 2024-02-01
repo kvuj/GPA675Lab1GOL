@@ -7,6 +7,7 @@
 #include <regex>
 #include <string>
 #include <optional>
+#include < algorithm >
 
 #include <GOL.h>
 #include "GridTeamH.h"
