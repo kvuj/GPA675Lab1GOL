@@ -379,13 +379,13 @@ void GOLTeamH::setSolidColor(State state, Color const& color)
 		mDeadColor = color;
 
 	mColorEncoded &= 0; // Clear
-	mColorEncoded |= ((static_cast<uint64_t>(mAliveColor.red) << 16) << 32 * static_cast<uint8_t>(state));
-	mColorEncoded |= ((static_cast<uint64_t>(mAliveColor.green) << 8) << 32 * static_cast<uint8_t>(state));
-	mColorEncoded |= (static_cast<uint64_t>(mAliveColor.blue) << 32 * static_cast<uint8_t>(state));
+	mColorEncoded |= (static_cast<uint64_t>(mAliveColor.red) << 16) << 32;
+	mColorEncoded |= (static_cast<uint64_t>(mAliveColor.green) << 8) << 32;
+	mColorEncoded |= static_cast<uint64_t>(mAliveColor.blue) << 32;
 
-	mColorEncoded |= ((static_cast<uint64_t>(mDeadColor.red) << 16) * static_cast<uint8_t>(state));
-	mColorEncoded |= ((static_cast<uint64_t>(mDeadColor.green) << 8) * static_cast<uint8_t>(state));
-	mColorEncoded |= (static_cast<uint64_t>(mDeadColor.blue) * static_cast<uint8_t>(state));
+	mColorEncoded |= (static_cast<uint64_t>(mDeadColor.red) << 16);
+	mColorEncoded |= (static_cast<uint64_t>(mDeadColor.green) << 8);
+	mColorEncoded |= static_cast<uint64_t>(mDeadColor.blue);
 }
 
 
