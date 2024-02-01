@@ -354,7 +354,6 @@ bool GOLTeamH::setFromPattern(std::string const& pattern)
 	int centerY = (mData.height() - sq.value().height)/2;
 	
 	fillDataFromPattern(pattern, sq.value(),centerX+1, centerY+1);
-	
 
 	mIteration = 0;
 	countLifeStatusCells();
@@ -564,14 +563,9 @@ void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 			// Coordonnées dans la grille de destination
 			int destX = centerX + x;
 			int destY = centerY + y;
-			/*if (centerX - sq.width / 2 + x <0
-				|| centerX - sq.width / 2 + x > mData.width()
-				|| centerY - sq.height / 2 + x <0
-				|| centerY - sq.height / 2 + x > mData.height()) {
-				continue;
-			}*/
+			
 			// Vérifier si les coordonnées sont dans la grille
-			if (destX >= 0 || destX < mData.width()-1 || destY >= 0 || destY < mData.height()-1) {
+			if (destX >= 0 || destX < mData.width() || destY >= 0 || destY < mData.height()) {
 				// On remplit la grille avec les valeurs du pattern
 				State cellState = (sq.pos[(y * sq.width) + x] == '0') ? State::dead : State::alive;
 				mData.setAt(destX, destY, cellState);
@@ -582,6 +576,7 @@ void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 			
 		}
 	}
+	
 }
 
 void GOLTeamH::countLifeStatusCells()
