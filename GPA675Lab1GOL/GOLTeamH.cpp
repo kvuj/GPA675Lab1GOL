@@ -83,14 +83,15 @@ avec ses bits. Ce nombre contient les règles de réanimation et de survie. Voir
 plus de détails."},
 		{"Pour mettre à jour l'image, nous parcourons le tableau réel au complet et nous utilisons une règle \
 de couleur encodée pour éviter une branche. Nous mettons les bits à 0, mettons le alpha à 255 et utilisons la \
-règle."},
+règle pour simplifier la modification."},
 		{"Nous avons encodé la règle dans un uint32_t en le divisant par deux. Le premier 16 bits (à gauche) \
 est celui de la règle de survie alors qu'à droite nous avons la règle de réanimation. En utilisant une multiplication \
 de 16, nous pouvons accéder à la bonne partie des bits avec aucune branche. Par la suite chaque bit (0-9) représente \
 la partie de la règle."
 		}},
 		.optionnalComments{"Il y a quelques différences dans les implémentations (ex: 3 -> quand on met un \
-pattern, la grid se remet à zéro alors que pas dans la 2 et 1.) Il serait bien d'avoir des précisions."}
+pattern, la grid se remet à zéro alors que pas dans la 2 et 1.) Il serait bien d'avoir des précisions sur les \
+détails."}
 	};
 }
 
