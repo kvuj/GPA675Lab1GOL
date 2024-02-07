@@ -94,8 +94,7 @@ private:
 	// Fonctions utilisées à l'interne.
 	unsigned char convertCharToNumber(const char c);
 	std::optional<sizeQueried> parsePattern(std::string const& pattern);
-	void fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
-		int centerX, int centerY);
+	void fillDataFromPattern(sizeQueried& sq, int centerX, int centerY);
 	void countLifeStatusCells();
 
 	// Fonction qui modifie le border selon la règle

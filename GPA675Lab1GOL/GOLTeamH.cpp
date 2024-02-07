@@ -324,7 +324,7 @@ bool GOLTeamH::setFromPattern(std::string const& pattern, int centerX, int cente
 	if (!sq.has_value())
 		return false;
 
-	fillDataFromPattern(pattern, sq.value(), centerX+1, centerY+1);
+	fillDataFromPattern(sq.value(), centerX + 1, centerY + 1);
 
 	mIteration = 0;
 	countLifeStatusCells();
@@ -349,11 +349,7 @@ bool GOLTeamH::setFromPattern(std::string const& pattern)
 	if (!sq.has_value())
 		return false;
 
-	// Offset pour ajuster le centrage du pattern
-	int centerX = (mData.width() - sq.value().width)/2;
-	int centerY = (mData.height() - sq.value().height)/2;
-	
-	fillDataFromPattern(pattern, sq.value(),centerX+1, centerY+1);
+	fillDataFromPattern(sq.value(), (mData.width() / 2) + 1, (mData.height() / 2) + 1);
 
 	mIteration = 0;
 	countLifeStatusCells();
@@ -553,19 +549,19 @@ std::optional<GOLTeamH::sizeQueried> GOLTeamH::parsePattern(std::string const& p
 		return std::nullopt;
 }
 
-void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
-	int centerX, int centerY)
+void GOLTeamH::fillDataFromPattern(sizeQueried& sq, int centerX, int centerY)
 {
 	mData.fill(State::dead, true);
+
 	// Remplissage de la grille aux positions spécifiées par le patron
 	for (size_t y = 0; y < sq.height; ++y) {
 		for (size_t x = 0; x < sq.width; ++x) {
 			// Coordonnées dans la grille de destination
-			int destX = centerX + x;
-			int destY = centerY + y;
-			
+			int destX = (centerX - ((sq.width + 1) / 2)) + x;
+			int destY = (centerY - ((sq.height + 1) / 2)) + y;
+
 			// Vérifier si les coordonnées sont dans la grille
-			if (destX >= 0 || destX < mData.width() || destY >= 0 || destY < mData.height()) {
+			if (destX > 0 && destX <= mData.width() && destY > 0 && destY <= mData.height()) {
 				// On remplit la grille avec les valeurs du pattern
 				State cellState = (sq.pos[(y * sq.width) + x] == '0') ? State::dead : State::alive;
 				mData.setAt(destX, destY, cellState);
@@ -573,10 +569,10 @@ void GOLTeamH::fillDataFromPattern(std::string const& pattern, sizeQueried& sq,
 			else {
 				continue;
 			}
-			
+
 		}
 	}
-	
+
 }
 
 void GOLTeamH::countLifeStatusCells()
