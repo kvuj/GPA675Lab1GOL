@@ -518,11 +518,13 @@ void GOLTeamH::updateImage(uint32_t* buffer, size_t buffer_size) const
 	// Pointeur qui se promène en mémoire.
 	auto* ptrGrid{ reinterpret_cast<uint8_t*>(mData.data()) };
 
+	// Clear tout
+	memset(buffer, 0, sizeof(uint32_t) * buffer_size);
+
 	// On itère sur chaque éléments du tableau et on associe la couleur.
 	while (s_ptr < e_ptr) {
-		*s_ptr &= 0;						// Clear
-		*s_ptr |= MAX_ALPHA << 24;			// Alpha = 255
-		*s_ptr |= mColorEncoded >> (32 * (*ptrGrid));
+		// Alpha = 255
+		*s_ptr |= mColorEncoded >> (32 * (*ptrGrid)) | MAX_ALPHA;
 
 		s_ptr++;
 		ptrGrid++;

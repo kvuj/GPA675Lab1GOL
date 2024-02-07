@@ -24,7 +24,7 @@
 // Elle se base sur l'utilisation de la classe GridTeamH afin de gérer les mouvement dans la grid
 // - - - - - - - - - - - - - - - - - - - - - - -
 
-constexpr unsigned char MAX_ALPHA = 255;
+constexpr uint32_t MAX_ALPHA = 255 << 24;
 
 class GOLTeamH : public GOL
 {
