@@ -208,6 +208,7 @@ bool GOLTeamH::setRule(std::string const& rule)
 
 void GOLTeamH::setBorderManagement(BorderManagement borderManagement)
 {
+	mData.fill(State::dead, true);
 	mBorderManagement = borderManagement;
 	mIteration = 0;
 	setBorder();
