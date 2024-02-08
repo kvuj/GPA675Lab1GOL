@@ -253,7 +253,10 @@ void GOLTeamH::setState(int x, int y, State state)
 	//! \param state L'état d'initialisation des cellules.
 void GOLTeamH::fill(State state)
 {
-	mData.fill(state, mBorderManagement == GOL::BorderManagement::immutableAsIs);
+	mData.fill(state, 
+		mBorderManagement == GOL::BorderManagement::immutableAsIs ||
+		mBorderManagement == GOL::BorderManagement::warping ||
+		mBorderManagement == GOL::BorderManagement::mirror);
 	modifyBorderIfNecessary(reinterpret_cast<uint8_t*>(mData.data()),
 		reinterpret_cast<uint8_t*>(mData.intData()));
 	mIteration = 0;
@@ -272,7 +275,10 @@ void GOLTeamH::fill(State state)
 	//! \param firstCell L'état de la première cellule.
 void GOLTeamH::fillAlternately(State firstCell)
 {
-	mData.fillAlternately(firstCell, mBorderManagement == GOL::BorderManagement::immutableAsIs);
+	mData.fillAlternately(firstCell, 
+		mBorderManagement == GOL::BorderManagement::immutableAsIs || 
+		mBorderManagement == GOL::BorderManagement::warping ||
+		mBorderManagement == GOL::BorderManagement::mirror);
 	modifyBorderIfNecessary(reinterpret_cast<uint8_t*>(mData.data()),
 		reinterpret_cast<uint8_t*>(mData.intData()));
 	mIteration = 0;
@@ -292,7 +298,10 @@ void GOLTeamH::fillAlternately(State firstCell)
 	//! vivante. La valeur doit être comprise entre 0.0 et 1.0 inclusivement.
 void GOLTeamH::randomize(double percentAlive)
 {
-	mData.randomize(percentAlive, mBorderManagement == GOL::BorderManagement::immutableAsIs);
+	mData.randomize(percentAlive, 
+		mBorderManagement == GOL::BorderManagement::immutableAsIs ||
+		mBorderManagement == GOL::BorderManagement::warping ||
+		mBorderManagement == GOL::BorderManagement::mirror);
 	modifyBorderIfNecessary(reinterpret_cast<uint8_t*>(mData.data()),
 		reinterpret_cast<uint8_t*>(mData.intData()));
 	mIteration = 0;
