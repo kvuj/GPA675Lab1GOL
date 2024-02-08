@@ -563,7 +563,7 @@ std::optional<GOLTeamH::sizeQueried> GOLTeamH::parsePattern(std::string const& p
 
 void GOLTeamH::fillDataFromPattern(sizeQueried& sq, int centerX, int centerY)
 {
-	mData.fill(State::dead, true);
+	mData.fill(State::dead, false);
 
 	// Remplissage de la grille aux positions spécifiées par le patron
 	for (size_t y = 0; y < sq.height; ++y) {
@@ -695,6 +695,9 @@ size_t GOLTeamH::countNeighbors(uint8_t* ptrGrid, BorderManagement bm) const
 	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
 	tempPtr++;
 	neighborsAliveCount += *(putInBounds(tempPtr, ptrGrid));
+
+	if (neighborsAliveCount)
+		int a = 0;
 
 	return neighborsAliveCount;
 }
