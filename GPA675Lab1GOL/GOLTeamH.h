@@ -98,8 +98,8 @@ private:
 	void countLifeStatusCells();
 
 	// Fonction qui modifie le border selon la règle
-	void modifyBorderIfNecessary(uint8_t* ptrGrid, uint8_t* ptrGridInt);
-	size_t countNeighbors(uint8_t* ptrGrid, BorderManagement bm) const;
+	void modifyBorderIfNecessary();
+	size_t countNeighbors(const uint8_t* ptrGrid) const;
 };
 
 #endif GOLTEAMH_H
