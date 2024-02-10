@@ -274,7 +274,5 @@ void GridTeamH::fillBorderOperation(DataType ptr, CellType value) const
 void GridTeamH::switchToIntermediate()
 {
 	// Swap pour la performance.
-	auto* temp{ mData };
-	mData = mIntermediateData;
-	mIntermediateData = temp;
+	std::swap(mData, mIntermediateData);
 }

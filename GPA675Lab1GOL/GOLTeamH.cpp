@@ -673,14 +673,14 @@ size_t GOLTeamH::countNeighbors(const uint8_t* cellPtr) const
 	// Petit lambda pour simplifier les opérations.
 	auto putInBounds = [width, height, bm, firstGridPtr, lastGridPtr](const uint8_t* ptr) {
 		if (ptr < firstGridPtr)
-			ptr += width * ((bm == GOL::BorderManagement::mirror) ? 2 : (height - 1));
+			ptr += width * ((bm == GOL::BorderManagement::mirror) ? 2 : height);
 		else if (ptr > lastGridPtr)
-			ptr -= width * ((bm == GOL::BorderManagement::mirror) ? 2 : (height - 1));
+			ptr -= width * ((bm == GOL::BorderManagement::mirror) ? 2 : height);
 
 		if ((ptr - firstGridPtr) % width == 0)
-			ptr -= ((bm == GOL::BorderManagement::mirror) ? 2 : (width - 1));
+			ptr -= ((bm == GOL::BorderManagement::mirror) ? 2 : width);
 		else if ((ptr - firstGridPtr) % width == width - 1)
-			ptr += ((bm == GOL::BorderManagement::mirror) ? 2 : (width - 1));
+			ptr += ((bm == GOL::BorderManagement::mirror) ? 2 : width);
 
 		return ptr;
 		};
