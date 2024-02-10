@@ -461,11 +461,9 @@ void GOLTeamH::processOneStep()
 			// 
 			// On accède à la bonne partie des bits et on compare si le bit de survie/réanimation est
 			// présent. Voir GOLTeamH.cpp pour plus de détails.
-			*(ptrGridInt - 1) = static_cast<bool>(
-				(mParsedRule >> *(ptrGrid + offset) * 16) & (1u << neighborsAliveCount));
+			*(ptrGridInt - 1) = ((mParsedRule >> *(ptrGrid + offset) * 16) >> neighborsAliveCount) & 1;
 
-			if (*(ptrGridInt - 1))
-				aliveCount++;
+			aliveCount += *(ptrGridInt - 1);
 		}
 
 		// On saute le border
