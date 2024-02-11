@@ -79,19 +79,18 @@ grid. Lors d'un redimensionnement, nous supprimons la mémoire et réallouont la
 selon la taille nécessaire."},
 		{"Nous parcourons simplement en mémoire les deux tableaux (réel et intermédiaire) et faisons \
 9 accès du tableau réel en mettant à jour la case de l'intermédiaire. Nous utilisons une règle encodée \
-avec ses bits. Ce nombre contient les règles de réanimation et de survie. Voir le fichier GOLTeamH.h pour \
-plus de détails."},
+avec ses bits. Ce nombre contient les règles de réanimation et de survie.  Des précisions sont offertes \
+dans le fichier GOLTeamH.h aux lignes 76-87."},
 		{"Pour mettre à jour l'image, nous parcourons le tableau réel au complet et nous utilisons une règle \
-de couleur encodée pour éviter une branche. Nous mettons les bits à 0, mettons le alpha à 255 et utilisons la \
-règle pour simplifier la modification."},
+de couleur encodée pour éviter une branche. Nous mettons les bits à 0, mettons le alpha à 255 et utilisons une \
+multiplication pour atteindre la bonne partie de la règle avant de la copier dans le buffer."},
 		{"Nous avons encodé la règle dans un uint32_t en le divisant par deux. Le premier 16 bits (à gauche) \
 est celui de la règle de survie alors qu'à droite nous avons la règle de réanimation. En utilisant une multiplication \
 de 16, nous pouvons accéder à la bonne partie des bits avec aucune branche. Par la suite chaque bit (0-9) représente \
-la partie de la règle."
-		}},
+la partie de la règle."}},
 		.optionnalComments{"Il y a quelques différences dans les implémentations (ex: 3 -> quand on met un \
 pattern, la grid se remet à zéro alors que pas dans la 2 et 1.) Il serait bien d'avoir des précisions sur les \
-détails."}
+détails nécessaires. Nous nous sommes basés sur la troisième."}
 	};
 }
 
@@ -550,6 +549,7 @@ std::optional<GOLTeamH::sizeQueried> GOLTeamH::parsePattern(std::string const& p
 {
 	// \[ -> on match le caractère [
 	// (\d+) -> on match plusieurs caractères de 0-9
+	// std::regex_constants::icase -> min ou maj
 	std::regex regexp(R"(\[(\d+)x(\d+)\](\d+))", std::regex_constants::icase);
 	std::smatch m;
 
@@ -670,11 +670,13 @@ size_t GOLTeamH::countNeighbors(const uint8_t* cellPtr) const
 
 	// Petit lambda pour simplifier les opérations.
 	auto putInBounds = [width, height, bm, firstGridPtr, lastGridPtr](const uint8_t* ptr) {
+		// En bas ou en haut de la grille.
 		if (ptr < firstGridPtr)
 			ptr += width * ((bm == GOL::BorderManagement::mirror) ? 2 : height);
 		else if (ptr > lastGridPtr)
 			ptr -= width * ((bm == GOL::BorderManagement::mirror) ? 2 : height);
 
+		// Gauche ou droite
 		if ((ptr - firstGridPtr) % width == 0)
 			ptr -= ((bm == GOL::BorderManagement::mirror) ? 2 : width);
 		else if ((ptr - firstGridPtr) % width == width - 1)
@@ -701,9 +703,6 @@ size_t GOLTeamH::countNeighbors(const uint8_t* cellPtr) const
 	neighborsAliveCount += *(putInBounds(tempPtr));
 	tempPtr++;
 	neighborsAliveCount += *(putInBounds(tempPtr));
-
-	if (neighborsAliveCount) // TODO: retire
-		int a = 0;
 
 	return neighborsAliveCount;
 }
