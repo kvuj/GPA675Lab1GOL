@@ -22,6 +22,7 @@ GridTeamH::GridTeamH(GridTeamH const& cpy)
 	: GridTeamH(cpy.width(), cpy.height(), CellType::alive)
 {
 	mAliveCount = cpy.mAliveCount;
+	mLastGenAliveCount = cpy.mLastGenAliveCount;
 	memcpy(mData, cpy.mData, cpy.size() * sizeof(CellType));
 	memcpy(mIntermediateData, cpy.mIntermediateData, cpy.size() * sizeof(CellType));
 }
@@ -41,6 +42,7 @@ GridTeamH& GridTeamH::operator=(GridTeamH const& cpy)
 		mWidth = cpy.mWidth;
 		mHeight = cpy.mHeight;
 		mAliveCount = cpy.mAliveCount;
+		mLastGenAliveCount = cpy.mLastGenAliveCount;
 
 		mData = new CellType[mWidth * mHeight];
 		mIntermediateData = new CellType[mWidth * mHeight];
@@ -60,6 +62,7 @@ GridTeamH& GridTeamH::operator=(GridTeamH&& mv) noexcept
 		dealloc();
 
 		mAliveCount = mv.mAliveCount;
+		mLastGenAliveCount = mv.mLastGenAliveCount;
 		mWidth = mv.mWidth;
 		mHeight = mv.mHeight;
 		mData = mv.mData;
